@@ -48,6 +48,7 @@ case "$1" in
 		iptables -A OUTPUT -j DROP
 
 		echo "Rules for redirecting certains ports traffic"
+		# http://www.linksysinfo.org/index.php?threads/route-only-specific-ports-through-vpn-openvpn.37240/
 		ip route add default table 100 via $WAN_GATEWAY dev $WAN_INTERFACE
 		ip rule add fwmark 1 table 100
 		ip route flush cache
