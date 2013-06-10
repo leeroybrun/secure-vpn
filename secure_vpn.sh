@@ -111,6 +111,8 @@ function iptablesDefaultRules
 # Route specific traffic without VPN & forward some packets to Synology
 function raspberryRules
 {
+	echo "Apply Raspberry Pi Rules"
+
 	# Disable Reverse Path Filtering on all network interfaces
 	for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
 		echo 0 > $i
@@ -154,7 +156,7 @@ function raspberryRules
 # Specific rules for Synology
 function synologyRules
 {
-
+	echo "Apply Synology Rules"
 }
 
 # Start VPN daemon
