@@ -175,10 +175,9 @@ function startVPN
 {
 	echo "Start VPN daemon"
 
-	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid 2> /dev/null)
+	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid 2> /dev/null | tr -d ' ')
 	if [ "$daemonPid" != "" ]; then
-		if ps ax | grep -v grep | grep $daemonPid > /dev/null
-	    then
+		if ps ax | grep -v grep | grep "$daemonPid" > /dev/null; then
 			echo "VPN daemon already running..."
 			exit 2
 		fi
