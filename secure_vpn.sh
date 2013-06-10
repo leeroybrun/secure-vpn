@@ -40,11 +40,11 @@ function main {
 				raspberryRules
 			fi
 
-			startVPN
+			#startVPN
 
 			# For testing - close VPN after 60 seconds
-			sleep 60
-			stopVPN
+			#sleep 60
+			#stopVPN
 
 			# If it doesn't work, reboot after 2 minutes
 			sleep 120
