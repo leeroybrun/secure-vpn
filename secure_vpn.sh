@@ -78,7 +78,7 @@ function iptablesFlush
 function iptablesDefaultRules
 {
 	echo "Default iptables rules"
-	
+
 	iptablesFlush
 
 	# Set default chain policies
@@ -148,8 +148,8 @@ function raspberryRules
 	iptables -t nat -A POSTROUTING -j MASQUERADE
 
 	# Open SSH & Synology ports on iptables
-	iptables -A INPUT -p tcp -m multiport --dports "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -m state --state NEW,ESTABLISHED -j ACCEPT
-	iptables -A OUTPUT -p tcp -m multiport --sports "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -m state --state ESTABLISHED -j ACCEPT
+	iptables -A INPUT -p tcp -m multiport --dports "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j ACCEPT
+	iptables -A OUTPUT -p tcp -m multiport --sports "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j ACCEPT
 
 	#echo "Rules for redirecting certains ports traffic"
 	# http://www.linksysinfo.org/index.php?threads/route-only-specific-ports-through-vpn-openvpn.37240/
