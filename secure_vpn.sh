@@ -46,7 +46,8 @@ function main {
 			sleep 60
 			stopVPN
 
-			sleep 500
+			# If it doesn't work, reboot after 2 minutes
+			sleep 120
 			reboot
 
 			exit 0
@@ -275,4 +276,4 @@ EOF
 }
 
 # Call the main function
-main
+main "$1"
