@@ -34,6 +34,8 @@ function main {
 
 			iptablesFlush
 
+			iptablesDefault
+
 			if [[ "$LOCAL_IP" = "$SYNOLOGY_IP" ]]; then
 				synologyRules
 			elif [[ "$LOCAL_IP" = "$RASPBERRY_IP" ]]; then
@@ -76,15 +78,18 @@ function iptablesFlush
 	iptables -t mangle -X
 }
 
+# Set default chain policies
+function iptablesDefault
+{
+	iptables -P INPUT DROP
+	iptables -P FORWARD DROP
+	iptables -P OUTPUT DROP
+}
+
 # Add default rules, block all traffic except local & VPN
 function iptablesGeneralRules
 {
 	echo "General iptables rules"
-
-	# Set default chain policies
-	iptables -P INPUT DROP
-	iptables -P FORWARD DROP
-	iptables -P OUTPUT DROP
 
 	# Accept packets through VPN
 	iptables -A INPUT -i tun+ -j ACCEPT
