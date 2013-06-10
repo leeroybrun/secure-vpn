@@ -217,7 +217,7 @@ function writeFiles
 				sleep 300
 			fi
 		done
-	EOF
+EOF
 
 	chmod +x /tmp/vpnfiles/vpndaemon.sh
 
@@ -243,7 +243,7 @@ function writeFiles
 		redirect-gateway def1
 		user nobody
 		group nobody
-	EOF
+EOF
 
 	# OpenVPN server certificate
 	cat >> /tmp/vpnfiles/ca.crt << EOF
@@ -270,7 +270,7 @@ function writeFiles
 		DtZ5L8SLV0eCulQ/WE3JmSyOu1j2mlbPS2258avko+qAFCF/aRZOQDYhN1zrcMOl
 		JpLvMQZvNXybx8DeB7rIDQL4RfkDgxZSHy21x6Q5Qp26hFFoDvogqb0j
 		-----END CERTIFICATE-----
-	EOF
+EOF
 
 }
 
