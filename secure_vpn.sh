@@ -17,12 +17,13 @@ VPN_USERNAME=""
 VPN_PASSWORD=""
 VPN_SERVER_IP="141.255.160.226"
 
-
 ##########################################
 #         DON'T EDIT LINES ABOVE         #
 ##########################################
+
 LOCAL_IP=$(hostname -I)
 
+# Main
 case "$1" in
 	start)
 		writeFiles ()
@@ -65,31 +66,31 @@ function iptablesDefaultRules ()
 {
 	iptablesFlush()
 
-	echo "Set default chain policies"
+	# Set default chain policies
 	iptables -P INPUT DROP
 	iptables -P FORWARD DROP
 	iptables -P OUTPUT DROP
 
-	echo "Accept packets through VPN"
+	# Accept packets through VPN
 	iptables -A INPUT -i tun+ -j ACCEPT
 	iptables -A OUTPUT -o tun+ -j ACCEPT
 
-	echo "Accept local connections"
+	# Accept local connections
 	#iptables -A INPUT -s 127.0.0.1 -j ACCEPT
 	#iptables -A OUTPUT -d 127.0.0.1 -j ACCEPT
 	iptables -A INPUT -i lo -j ACCEPT
 	iptables -A OUTPUT -o lo -j ACCEPT
 
-	echo "Accept connections from/to VPN servers"
+	# Accept connections from/to VPN servers
 	iptables -A INPUT -s "$VPN_SERVER_IP" -j ACCEPT
 	iptables -A OUTPUT -d "$VPN_SERVER_IP" -j ACCEPT
 
-	echo "Accept connections from/to local network"
+	# Accept connections from/to local network
 	# TODO : auto detect local network
 	iptables -A INPUT -s "$LOCAL_NETWORK" -j ACCEPT
 	iptables -A OUTPUT -d "$LOCAL_NETWORK" -j ACCEPT
 
-	echo "Drop anything else..."
+	# Drop anything else...
 	iptables -A INPUT -j DROP
 	iptables -A OUTPUT -j DROP
 }
@@ -98,24 +99,44 @@ function iptablesDefaultRules ()
 # Route specific traffic without VPN & forward some packets to Synology
 function raspberryRules ()
 {
-	echo "Allow access to certains ports without VPN"
-	iptables -A INPUT -i "$WAN_INTERFACE" -p tcp -m multiport --dports "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -m state --state NEW,ESTABLISHED -j ACCEPT
-	iptables -A OUTPUT -o "$WAN_INTERFACE" -p tcp -m multiport --sports "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -m state --state ESTABLISHED -j ACCEPT
+	# Disable Reverse Path Filtering on all network interfaces
+	for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
+		echo 0 > $i
+	done
 
-	echo "Rules for redirecting certains ports traffic"
-	# http://www.linksysinfo.org/index.php?threads/route-only-specific-ports-through-vpn-openvpn.37240/
-	ip route add default table 100 via $WAN_GATEWAY dev $WAN_INTERFACE
-	ip rule add fwmark 1 table 100
+	# Delete table "vpnconf" and flush all existing rules
+	ip route flush table vpnconf
+	ip route del default table vpnconf
+	ip rule del fwmark 1 table vpnconf
 	ip route flush cache
-	iptables -t mangle -I PREROUTING -p tcp --dport "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -j MARK --set-mark 1
+	iptables -t mangle -F PREROUTING
 
-	echo "Enable IP forwarding"
+	# Table "vpnconf" will route all traffic with mark 1 to WAN (no VPN)
+	ip route add default table vpnconf via $WAN_GATEWAY dev $WAN_INTERFACE
+	ip rule add fwmark 1 table vpnconf
+	ip route flush cache
+
+	# Default behavious : all traffic via VPN
+	iptables -t mangle -A PREROUTING -j MARK --set-mark 0
+
+	# SSH and Synology ports bypass VPN
+	iptables -t mangle -A PREROUTING -p tcp -m multiport --dport "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -j MARK --set-mark 1
+
+	# Enable IP forwarding
 	echo "1" > /proc/sys/net/ipv4/ip_forward
 
-	echo "Redirect traffic from certains ports to Synology"
+	# Redirect traffic from certains ports to Synology
 	# http://www.debuntu.org/how-to-redirecting-network-traffic-to-a-new-ip-using-iptables/
 	iptables -t nat -A PREROUTING -p tcp –dport "$SYNOLOGY_PORT" -j DNAT –to-destination "$SYNOLOGY_IP:$SYNOLOGY_PORT"
 	iptables -t nat -A POSTROUTING -j MASQUERADE
+
+	# Open SSH & Synology ports on iptables
+	iptables -A INPUT -i "$WAN_INTERFACE" -p tcp -m multiport --dports "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -m state --state NEW,ESTABLISHED -j ACCEPT
+	iptables -A OUTPUT -o "$WAN_INTERFACE" -p tcp -m multiport --sports "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -m state --state ESTABLISHED -j ACCEPT
+
+	#echo "Rules for redirecting certains ports traffic"
+	# http://www.linksysinfo.org/index.php?threads/route-only-specific-ports-through-vpn-openvpn.37240/
+	#iptables -t mangle -I PREROUTING -p tcp --dport "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -j MARK --set-mark 1
 }
 
 # Specific rules for Synology
@@ -127,7 +148,25 @@ function synologyRules ()
 # Start VPN daemon
 function startVPN ()
 {
-	/tmp/vpnfiles/vpndaemon.sh &
+	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid)
+	# cf. http://www.linux-mag.com/id/5981
+	if ps ax | grep -v grep | grep $daemonPid > /dev/null
+    then
+		echo "VPN daemon already running..."
+	else
+		(./tmp/vpnfiles/vpndaemon.sh &) &
+		echo $! > /tmp/vpnfiles/vpndaemon.pid
+	fi
+}
+
+# Stop VPN daemon
+function stopVPN ()
+{
+	iptablesFlush ()
+	killall openvpn
+
+	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid)
+	kill -p $daemonPid
 }
 
 # Write OpenVPN files
@@ -139,16 +178,19 @@ function writeFiles ()
 {
 	mkdir /tmp/vpnfiles/
 
+	# Login conf
 	echo "$VPN_USERNAME
 	$VPN_PASSWORD" > /tmp/vpnfiles/login.conf
 
+	# VPN daemon script
 	cat >> /tmp/vpnfiles/vpndaemon.sh << EOF
 		function getStatus () {
 			ifconfig | grep $1 && return 1
 			return 0
 		}
 
-		while [[ 1 ]]; do
+		while :
+		do
 			getStatus tun0
 			if [[ $? == 0 ]]; then
 				echo "OpenVPN not connected ! Reconnecting..."
@@ -165,6 +207,7 @@ function writeFiles ()
 
 	chmod +x /tmp/vpnfiles/vpndaemon.sh
 
+	# OpenVPN client config
 	cat >> /tmp/vpnfiles/client.ovpn << EOF
 		client
 		dev tun
@@ -188,6 +231,7 @@ function writeFiles ()
 		group nobody
 	EOF
 
+	# OpenVPN server certificate
 	cat >> /tmp/vpnfiles/ca.crt << EOF
 		-----BEGIN CERTIFICATE-----
 		MIID5jCCA0+gAwIBAgIJAI5At1MshkY1MA0GCSqGSIb3DQEBBQUAMIGpMQswCQYD
