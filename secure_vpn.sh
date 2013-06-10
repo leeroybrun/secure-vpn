@@ -24,7 +24,7 @@ VPN_SERVER_IP="141.255.160.226"
 #         DON'T EDIT LINES ABOVE         #
 ##########################################
 
-LOCAL_IP=$(hostname -I)
+LOCAL_IP=$(hostname -I | tr -d ' ')
 
 # Main
 function main {
