@@ -34,9 +34,9 @@ function main {
 
 			iptablesDefaultRules
 
-			if [ "$LOCAL_IP" -eq "$SYNOLOGY_IP" ]; then
+			if [[ "$LOCAL_IP" = "$SYNOLOGY_IP" ]]; then
 				synologyRules
-			elif [ "$LOCAL_IP" -eq "$RASPBERRY_IP" ]; then
+			elif [[ "$LOCAL_IP" = "$RASPBERRY_IP" ]]; then
 				raspberryRules
 			fi
 
