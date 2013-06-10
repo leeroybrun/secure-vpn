@@ -257,7 +257,7 @@ comp-lzo
 verb 3
 redirect-gateway def1
 user nobody
-group nobody
+group nogroup
 EOF
 
 	# OpenVPN server certificate
