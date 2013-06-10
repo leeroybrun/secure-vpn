@@ -21,7 +21,7 @@ VPN_PASSWORD=""
 VPN_SERVER_IP="141.255.160.226"
 
 ##########################################
-#         DON'T EDIT LINES ABOVE         #
+#         DON'T EDIT LINES BELOW         #
 ##########################################
 
 LOCAL_IP=$(hostname -I | tr -d ' ')
@@ -175,15 +175,17 @@ function startVPN
 {
 	echo "Start VPN daemon"
 
-	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid)
-	# cf. http://www.linux-mag.com/id/5981
-	if ps ax | grep -v grep | grep $daemonPid > /dev/null
-    then
-		echo "VPN daemon already running..."
-	else
-		(./tmp/vpnfiles/vpndaemon.sh &) &
-		echo $! > /tmp/vpnfiles/vpndaemon.pid
+	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid 2> /dev/null)
+	if [ "$daemonPid" != "" ]; then
+		if ps ax | grep -v grep | grep $daemonPid > /dev/null
+	    then
+			echo "VPN daemon already running..."
+			exit 2
+		fi
 	fi
+
+	(/tmp/vpnfiles/vpndaemon.sh &) &
+	echo $! > /tmp/vpnfiles/vpndaemon.pid
 }
 
 # Stop VPN daemon
