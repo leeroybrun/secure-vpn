@@ -32,7 +32,7 @@ function main {
 		start)
 			writeFiles
 
-			iptablesDefaultRules
+			iptablesFlush
 
 			if [[ "$LOCAL_IP" = "$SYNOLOGY_IP" ]]; then
 				synologyRules
@@ -40,11 +40,9 @@ function main {
 				raspberryRules
 			fi
 
-			#startVPN
+			iptablesGeneralRules
 
-			# For testing - close VPN after 60 seconds
-			#sleep 60
-			#stopVPN
+			#startVPN
 
 			# If it doesn't work, reboot after 2 minutes
 			sleep 120
@@ -75,11 +73,9 @@ function iptablesFlush
 }
 
 # Add default rules, block all traffic except local & VPN
-function iptablesDefaultRules
+function iptablesGeneralRules
 {
-	echo "Default iptables rules"
-
-	iptablesFlush
+	echo "General iptables rules"
 
 	# Set default chain policies
 	iptables -P INPUT DROP
@@ -121,16 +117,14 @@ function raspberryRules
 		echo 0 > $i
 	done
 
-	# Delete table "vpnconf" and flush all existing rules
-	ip route flush table vpnconf
-	ip route del default table vpnconf
-	ip rule del fwmark 1 table vpnconf
+	# Delete table 100 and flush all existing rules
+	ip route flush table 100
 	ip route flush cache
 	iptables -t mangle -F PREROUTING
 
-	# Table "vpnconf" will route all traffic with mark 1 to WAN (no VPN)
-	ip route add default table vpnconf via $WAN_GATEWAY dev $WAN_INTERFACE
-	ip rule add fwmark 1 table vpnconf
+	# Table 100 will route all traffic with mark 1 to WAN (no VPN)
+	ip route add default table 100 via $WAN_GATEWAY dev $WAN_INTERFACE
+	ip rule add fwmark 1 table 100
 	ip route flush cache
 
 	# Default behavious : all traffic via VPN
@@ -144,12 +138,13 @@ function raspberryRules
 
 	# Redirect traffic from certains ports to Synology
 	# http://www.debuntu.org/how-to-redirecting-network-traffic-to-a-new-ip-using-iptables/
-	iptables -t nat -A PREROUTING -p tcp –dport "$SYNOLOGY_PORT" -j DNAT –to-destination "$SYNOLOGY_IP:$SYNOLOGY_PORT"
+	iptables -t nat -A PREROUTING -p tcp --dport "$SYNOLOGY_PORT" -j DNAT --to-destination "$SYNOLOGY_IP:$SYNOLOGY_PORT"
 	iptables -t nat -A POSTROUTING -j MASQUERADE
 
 	# Open SSH & Synology ports on iptables
-	iptables -A INPUT -p tcp -m multiport --dports "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j ACCEPT
-	iptables -A OUTPUT -p tcp -m multiport --sports "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j ACCEPT
+	iptables -A INPUT -p tcp --dport ssh -j ACCEPT
+	iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+	iptables -A INPUT -p tcp --dport 16364 -j ACCEPT
 
 	#echo "Rules for redirecting certains ports traffic"
 	# http://www.linksysinfo.org/index.php?threads/route-only-specific-ports-through-vpn-openvpn.37240/
@@ -197,6 +192,7 @@ function stopVPN
 #   - vpn certificate
 function writeFiles
 {
+	rm -rf /tmp/vpnfiles/
 	mkdir /tmp/vpnfiles/
 
 	# Login conf
