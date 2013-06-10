@@ -38,6 +38,10 @@ case "$1" in
 
 		startVPN ()
 
+		# For testing - close VPN after 60 seconds
+		sleep 60
+		stopVPN()
+
 		exit 0
 	;;
 
