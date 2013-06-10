@@ -2,6 +2,8 @@
 
 # TorGuard Raspberry : http://torguard.net/knowledgebase.php?action=displayarticle&id=90
 
+# TODO : knock knock on ports
+
 #########################################
 #                CONFIG                 #
 #########################################
