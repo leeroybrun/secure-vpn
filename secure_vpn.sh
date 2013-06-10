@@ -175,7 +175,7 @@ function startVPN
 {
 	echo "Start VPN daemon"
 
-	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid 2> /dev/null | tr -d ' ')
+	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid 2> /dev/null)
 	if [ "$daemonPid" != "" ]; then
 		if ps ax | grep -v grep | grep "$daemonPid" > /dev/null; then
 			echo "VPN daemon already running..."
@@ -216,14 +216,14 @@ function writeFiles
 	# VPN daemon script
 	cat >> /tmp/vpnfiles/vpndaemon.sh << EOF
 		function getStatus {
-			ifconfig | grep $1 && return 1
+			ifconfig | grep "\$1" && return 1
 			return 0
 		}
 
 		while :
 		do
 			getStatus tun0
-			if [[ $? == 0 ]]; then
+			if [[ \$? == 0 ]]; then
 				echo "OpenVPN not connected ! Reconnecting..."
 				openvpn --daemon --config /tmp/vpnfiles/client.ovpn
 
