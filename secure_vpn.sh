@@ -10,7 +10,7 @@ SYNOLOGY_IP="192.168.1.80"
 SYNOLOGY_PORT="1234"
 
 RASPBERRY_IP="192.168.1.49"
-RASPBERRY_SSH_PORT="1234"
+RASPBERRY_PORTS="1234"
 
 LOCAL_NETWORK="192.168.1.0/24"
 WAN_INTERFACE="eth0"
@@ -77,6 +77,8 @@ function iptablesFlush
 # Add default rules, block all traffic except local & VPN
 function iptablesDefaultRules
 {
+	echo "Default iptables rules"
+	
 	iptablesFlush
 
 	# Set default chain policies
@@ -135,7 +137,7 @@ function raspberryRules
 	iptables -t mangle -A PREROUTING -j MARK --set-mark 0
 
 	# SSH and Synology ports bypass VPN
-	iptables -t mangle -A PREROUTING -p tcp -m multiport --dport "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -j MARK --set-mark 1
+	iptables -t mangle -A PREROUTING -p tcp -m multiport --dport "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j MARK --set-mark 1
 
 	# Enable IP forwarding
 	echo "1" > /proc/sys/net/ipv4/ip_forward
@@ -146,12 +148,12 @@ function raspberryRules
 	iptables -t nat -A POSTROUTING -j MASQUERADE
 
 	# Open SSH & Synology ports on iptables
-	iptables -A INPUT -i "$WAN_INTERFACE" -p tcp -m multiport --dports "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -m state --state NEW,ESTABLISHED -j ACCEPT
-	iptables -A OUTPUT -o "$WAN_INTERFACE" -p tcp -m multiport --sports "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -m state --state ESTABLISHED -j ACCEPT
+	iptables -A INPUT -p tcp -m multiport --dports "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -m state --state NEW,ESTABLISHED -j ACCEPT
+	iptables -A OUTPUT -p tcp -m multiport --sports "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -m state --state ESTABLISHED -j ACCEPT
 
 	#echo "Rules for redirecting certains ports traffic"
 	# http://www.linksysinfo.org/index.php?threads/route-only-specific-ports-through-vpn-openvpn.37240/
-	#iptables -t mangle -I PREROUTING -p tcp --dport "$RASPBERRY_SSH_PORT,$SYNOLOGY_PORT" -j MARK --set-mark 1
+	#iptables -t mangle -I PREROUTING -p tcp --dport "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j MARK --set-mark 1
 }
 
 # Specific rules for Synology
@@ -163,6 +165,8 @@ function synologyRules
 # Start VPN daemon
 function startVPN
 {
+	echo "Start VPN daemon"
+
 	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid)
 	# cf. http://www.linux-mag.com/id/5981
 	if ps ax | grep -v grep | grep $daemonPid > /dev/null
@@ -177,6 +181,8 @@ function startVPN
 # Stop VPN daemon
 function stopVPN
 {
+	echo "Stop VPN daemon"
+
 	iptablesFlush
 	killall openvpn
 
