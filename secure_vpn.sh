@@ -27,41 +27,43 @@ VPN_SERVER_IP="141.255.160.226"
 LOCAL_IP=$(hostname -I)
 
 # Main
-case "$1" in
-	start)
-		writeFiles
+function main {
+	case "$1" in
+		start)
+			writeFiles
 
-		iptablesDefaultRules
+			iptablesDefaultRules
 
-		if [ "$LOCAL_IP" -eq "$SYNOLOGY_IP" ]; then
-			synologyRules
-		elif [ "$LOCAL_IP" -eq "$RASPBERRY_IP" ]; then
-			raspberryRules
-		fi
+			if [ "$LOCAL_IP" -eq "$SYNOLOGY_IP" ]; then
+				synologyRules
+			elif [ "$LOCAL_IP" -eq "$RASPBERRY_IP" ]; then
+				raspberryRules
+			fi
 
-		startVPN
+			startVPN
 
-		# For testing - close VPN after 60 seconds
-		sleep 60
-		stopVPN
+			# For testing - close VPN after 60 seconds
+			sleep 60
+			stopVPN
 
-		sleep 500
-		reboot
+			sleep 500
+			reboot
 
-		exit 0
-	;;
+			exit 0
+		;;
 
-	stop)
-		iptablesFlush
+		stop)
+			iptablesFlush
 
-		exit 0
-	;;
+			exit 0
+		;;
 
-	*)
-		echo "Usage : $0 {start|stop}"
-		exit 1
-	;;
-esac
+		*)
+			echo "Usage : $0 {start|stop}"
+			exit 1
+		;;
+	esac
+}
 
 # Flush iptables rules
 function iptablesFlush
@@ -269,3 +271,6 @@ function writeFiles
 	EOF
 
 }
+
+# Call the main function
+main
