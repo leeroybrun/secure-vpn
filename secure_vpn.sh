@@ -29,9 +29,9 @@ LOCAL_IP=$(hostname -I)
 # Main
 case "$1" in
 	start)
-		writeFiles ()
+		writeFiles()
 
-		iptablesDefaultRules ()
+		iptablesDefaultRules()
 
 		if [ "$LOCAL_IP" -eq "$SYNOLOGY_IP" ]; then
 			synologyRules()
@@ -39,11 +39,14 @@ case "$1" in
 			raspberryRules()
 		fi
 
-		startVPN ()
+		startVPN()
 
 		# For testing - close VPN after 60 seconds
 		sleep 60
 		stopVPN()
+
+		sleep 500
+		reboot
 
 		exit 0
 	;;
@@ -61,7 +64,7 @@ case "$1" in
 esac
 
 # Flush iptables rules
-function iptablesFlush ()
+function iptablesFlush()
 {
 	echo "Flush iptables"
 	iptables -F
@@ -69,7 +72,7 @@ function iptablesFlush ()
 }
 
 # Add default rules, block all traffic except local & VPN
-function iptablesDefaultRules ()
+function iptablesDefaultRules()
 {
 	iptablesFlush()
 
@@ -104,7 +107,7 @@ function iptablesDefaultRules ()
 
 # Specific rules for Raspberry Pi
 # Route specific traffic without VPN & forward some packets to Synology
-function raspberryRules ()
+function raspberryRules()
 {
 	# Disable Reverse Path Filtering on all network interfaces
 	for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
@@ -147,13 +150,13 @@ function raspberryRules ()
 }
 
 # Specific rules for Synology
-function synologyRules ()
+function synologyRules()
 {
 
 }
 
 # Start VPN daemon
-function startVPN ()
+function startVPN()
 {
 	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid)
 	# cf. http://www.linux-mag.com/id/5981
@@ -167,9 +170,9 @@ function startVPN ()
 }
 
 # Stop VPN daemon
-function stopVPN ()
+function stopVPN()
 {
-	iptablesFlush ()
+	iptablesFlush()
 	killall openvpn
 
 	daemonPid=$(cat /tmp/vpnfiles/vpndaemon.pid)
@@ -181,7 +184,7 @@ function stopVPN ()
 #   - vpndaemon script
 #   - openvpn conf
 #   - vpn certificate
-function writeFiles ()
+function writeFiles()
 {
 	mkdir /tmp/vpnfiles/
 
@@ -191,7 +194,7 @@ function writeFiles ()
 
 	# VPN daemon script
 	cat >> /tmp/vpnfiles/vpndaemon.sh << EOF
-		function getStatus () {
+		function getStatus() {
 			ifconfig | grep $1 && return 1
 			return 0
 		}
