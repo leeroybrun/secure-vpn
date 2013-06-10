@@ -149,7 +149,7 @@ function raspberryRules
 	# http://www.debuntu.org/how-to-redirecting-network-traffic-to-a-new-ip-using-iptables/
 	iptables -I FORWARD -p tcp -d "$SYNOLOGY_IP" --dport "$SYNOLOGY_PORT" -j ACCEPT
 	iptables -I FORWARD -p tcp -s "$SYNOLOGY_IP" --sport "$SYNOLOGY_PORT" -j ACCEPT
-	iptables -t nat -A PREROUTING -i lo -p tcp --dport "$SYNOLOGY_PORT" -j DNAT --to-destination "$SYNOLOGY_IP:$SYNOLOGY_PORT"
+	iptables -t nat -A PREROUTING -p tcp --dport "$SYNOLOGY_PORT" -j DNAT --to-destination "$SYNOLOGY_IP:$SYNOLOGY_PORT"
 	iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 	# Open SSH & Synology ports on iptables
