@@ -44,7 +44,7 @@ function main {
 
 			iptablesGeneralRules
 
-			#startVPN
+			startVPN
 
 			# If it doesn't work, reboot after 2 minutes
 			sleep 120
@@ -146,13 +146,16 @@ function raspberryRules
 	echo "1" > /proc/sys/net/ipv4/ip_forward
 
 	# Redirect traffic from certains ports to Synology
+	# TODO : loop over all ports dynamically
 	# http://www.debuntu.org/how-to-redirecting-network-traffic-to-a-new-ip-using-iptables/
+	# http://www.ridinglinux.org/2008/05/21/simple-port-forwarding-with-iptables-in-linux/
 	iptables -I FORWARD -p tcp -d "$SYNOLOGY_IP" --dport "$SYNOLOGY_PORT" -j ACCEPT
 	iptables -I FORWARD -p tcp -s "$SYNOLOGY_IP" --sport "$SYNOLOGY_PORT" -j ACCEPT
 	iptables -t nat -A PREROUTING -p tcp --dport "$SYNOLOGY_PORT" -j DNAT --to-destination "$SYNOLOGY_IP:$SYNOLOGY_PORT"
 	iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 	# Open SSH & Synology ports on iptables
+	# TODO : loop over all ports dynamically
 	iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 	iptables -A INPUT -p tcp --dport 16364 -j ACCEPT
 	iptables -A INPUT -p tcp --dport 5225 -j ACCEPT
