@@ -147,17 +147,18 @@ function raspberryRules
 
 	# Redirect traffic from certains ports to Synology
 	# http://www.debuntu.org/how-to-redirecting-network-traffic-to-a-new-ip-using-iptables/
-	iptables -t nat -A PREROUTING -p tcp --dport "$SYNOLOGY_PORT" -j DNAT --to-destination "$SYNOLOGY_IP:$SYNOLOGY_PORT"
-	iptables -t nat -A POSTROUTING -j MASQUERADE
+	iptables -I FORWARD -p tcp -d "$SYNOLOGY_IP" --dport "$SYNOLOGY_PORT" -j ACCEPT
+	iptables -I FORWARD -p tcp -s "$SYNOLOGY_IP" --sport "$SYNOLOGY_PORT" -j ACCEPT
+	iptables -t nat -A PREROUTING -i lo -p tcp --dport "$SYNOLOGY_PORT" -j DNAT --to-destination "$SYNOLOGY_IP:$SYNOLOGY_PORT"
+	iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 	# Open SSH & Synology ports on iptables
-	iptables -A INPUT -p tcp --dport ssh -j ACCEPT
 	iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 	iptables -A INPUT -p tcp --dport 16364 -j ACCEPT
-
-	#echo "Rules for redirecting certains ports traffic"
-	# http://www.linksysinfo.org/index.php?threads/route-only-specific-ports-through-vpn-openvpn.37240/
-	#iptables -t mangle -I PREROUTING -p tcp --dport "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j MARK --set-mark 1
+	iptables -A INPUT -p tcp --dport 5225 -j ACCEPT
+	iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
+	iptables -A OUTPUT -p tcp --sport 16364 -j ACCEPT
+	iptables -A OUTPUT -p tcp --sport 5225 -j ACCEPT
 }
 
 # Specific rules for Synology
