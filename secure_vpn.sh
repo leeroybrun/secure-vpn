@@ -106,8 +106,8 @@ function iptablesGeneralRules
 	iptables -A OUTPUT -d "$LOCAL_NETWORK" -j ACCEPT
 
 	# Drop anything else...
-	iptables -A INPUT -j DROP
-	iptables -A OUTPUT -j DROP
+	#iptables -A INPUT -j DROP
+	#iptables -A OUTPUT -j DROP
 }
 
 # Specific rules for Raspberry Pi
