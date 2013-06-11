@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "/root/securevpn/config/config.sh"
+source /root/secure-vpn/config/config.sh
 
 # Delete table 100 and flush all existing rules
 ip route flush table 100
