@@ -206,6 +206,8 @@ function writeFiles
 
 	# VPN daemon script
 	cat >> /tmp/vpnfiles/vpndaemon.sh << EOF
+		#!/bin/bash
+		
 		function getStatus {
 			ifconfig | grep "\$1" && return 1
 			return 0
@@ -229,6 +231,8 @@ EOF
 	chmod +x /tmp/vpnfiles/vpndaemon.sh
 
 	cat >> /tmp/vpnfiles/raspberry_vpn_up.sh << EOF
+		#!/bin/bash
+
 		# Delete table 100 and flush all existing rules
 		ip route flush table 100
 		ip route flush cache
