@@ -9,6 +9,8 @@ $VPN_PASSWORD" > ./config/login.conf
 # Add ports config to Raspberry OpenVPN up file
 startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="#### PORTS CONFIG ####" ./scripts/raspberry_vpn_up.sh)
 
+echo "$startLine"
+
 head -n $startLine ./scripts/raspberry_vpn_up.sh > ./scripts/raspberry_vpn_up.sh
 
 for port in "$RASPBERRY_PORTS $SYNOLOGY_PORTS"; do
