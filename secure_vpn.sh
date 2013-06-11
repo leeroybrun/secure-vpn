@@ -56,6 +56,10 @@ function main {
 		;;
 
 		stop)
+			iptables -P INPUT ACCEPT
+			iptables -P FORWARD ACCEPT
+			iptables -P OUTPUT ACCEPT
+
 			iptablesFlush
 
 			exit 0
