@@ -1,11 +1,15 @@
 #!/bin/bash
 
-# CONFIG
+# ------------------------------------------------
+# Load config file
+# ------------------------------------------------
 source ./config/config.sh
 
 LOCAL_IP=$(hostname -I | tr -d ' ')
 
-# MAIN
+# ------------------------------------------------
+# Main
+# ------------------------------------------------
 function main {
 	case "$1" in
 		start)
@@ -33,6 +37,8 @@ function main {
 		stop)
 			iptablesFlush
 
+			stopVPN
+
 			exit 0
 		;;
 
@@ -43,7 +49,9 @@ function main {
 	esac
 }
 
-# Flush iptables rules
+# ------------------------------------------------
+# Flush iptables rules and reset default policy
+# ------------------------------------------------
 function iptablesFlush
 {
 	echo "Flush iptables"
@@ -58,7 +66,9 @@ function iptablesFlush
 	iptables -t mangle -X
 }
 
+# ------------------------------------------------
 # Set default chain policies
+# ------------------------------------------------
 function iptablesDefault
 {
 	iptables -P INPUT DROP
@@ -66,7 +76,9 @@ function iptablesDefault
 	iptables -P OUTPUT DROP
 }
 
+# ------------------------------------------------
 # Add default rules, block all traffic except local & VPN
+# ------------------------------------------------
 function iptablesGeneralRules
 {
 	echo "General iptables rules"
@@ -95,8 +107,10 @@ function iptablesGeneralRules
 	#iptables -A OUTPUT -j DROP
 }
 
-# Specific rules for Raspberry Pi
+# ------------------------------------------------
+# Specific rules for the Raspberry Pi
 # Route specific traffic without VPN & forward some packets to Synology
+# ------------------------------------------------
 function raspberryRules
 {
 	echo "Apply Raspberry Pi rules"
@@ -129,13 +143,17 @@ function raspberryRules
 	done
 }
 
-# Specific rules for Synology
+# ------------------------------------------------
+# Specific rules for the Synology
+# ------------------------------------------------
 function synologyRules
 {
 	echo "Apply Synology Rules"
 }
 
-# Start VPN daemon
+# ------------------------------------------------
+# Start the VPN daemon
+# ------------------------------------------------
 function startVPN
 {
 	echo "Start VPN daemon"
@@ -152,12 +170,13 @@ function startVPN
 	echo $! > ./vpndaemon.pid
 }
 
-# Stop VPN daemon
+# ------------------------------------------------
+# Stop the VPN daemon
+# ------------------------------------------------
 function stopVPN
 {
 	echo "Stop VPN daemon"
 
-	iptablesFlush
 	killall openvpn
 
 	daemonPid=$(cat ./vpndaemon.pid)
