@@ -15,7 +15,7 @@ head -n $startLine ./scripts/raspberry_vpn_up.sh > ./scripts/raspberry_vpn_up_tm
 mv ./scripts/raspberry_vpn_up_tmp.sh ./scripts/raspberry_vpn_up.sh
 
 for port in "$RASPBERRY_PORTS $SYNOLOGY_PORTS"; do
-	echo >> ./scripts/raspberry_vpn_up.sh
+	sed -i -e '$a\' ./scripts/raspberry_vpn_up.sh
 	echo "iptables -t mangle -A PREROUTING -p tcp --dport $port -j MARK --set-mark 1" >> ./scripts/raspberry_vpn_up.sh
 done
 
