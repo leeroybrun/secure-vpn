@@ -128,22 +128,6 @@ function raspberryRules
 		echo 0 > $i
 	done
 
-	# Delete table 100 and flush all existing rules
-	ip route flush table 100
-	ip route flush cache
-	iptables -t mangle -F PREROUTING
-
-	# Table 100 will route all traffic with mark 1 to WAN (no VPN)
-	ip route add default table 100 via $WAN_GATEWAY dev $WAN_INTERFACE
-	ip rule add fwmark 1 table 100
-	ip route flush cache
-
-	# Default behavious : all traffic via VPN
-	iptables -t mangle -A PREROUTING -j MARK --set-mark 0
-
-	# SSH and Synology ports bypass VPN
-	iptables -t mangle -A PREROUTING -p tcp -m multiport --dport "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j MARK --set-mark 1
-
 	# Enable IP forwarding
 	echo "1" > /proc/sys/net/ipv4/ip_forward
 
@@ -237,8 +221,30 @@ function writeFiles
 			fi
 		done
 EOF
-
 	chmod +x /tmp/vpnfiles/vpndaemon.sh
+
+	cat >> /tmp/vpnfiles/raspberry_vpn_up.sh << EOF
+		# Delete table 100 and flush all existing rules
+		ip route flush table 100
+		ip route flush cache
+		iptables -t mangle -F PREROUTING
+
+		# Table 100 will route all traffic with mark 1 to WAN (no VPN)
+		ip route add default table 100 via $WAN_GATEWAY dev $WAN_INTERFACE
+		ip rule add fwmark 1 table 100
+		ip route flush cache
+
+		# Default behavious : all traffic via VPN
+		#iptables -t mangle -A PREROUTING -j MARK --set-mark 0
+
+		# SSH and Synology ports bypass VPN
+		#iptables -t mangle -A PREROUTING -p tcp -m multiport --dport "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j MARK --set-mark 1
+
+		iptables -t mangle -A PREROUTING -p tcp --dport 22 -j MARK --set-mark 1
+        iptables -t mangle -A PREROUTING -p tcp --dport 16364 -j MARK --set-mark 1
+        iptables -t mangle -A PREROUTING -p tcp --dport 5225 -j MARK --set-mark 1
+EOF
+	chmod +x /tmp/vpnfiles/raspberry_vpn_up.sh
 
 	# OpenVPN client config
 	cat >> /tmp/vpnfiles/client.ovpn << EOF
@@ -260,6 +266,8 @@ verb 3
 redirect-gateway def1
 user nobody
 group nogroup
+script-security 2
+up /tmp/vpnfiles/raspberry_vpn_up.sh
 EOF
 
 	# OpenVPN server certificate
