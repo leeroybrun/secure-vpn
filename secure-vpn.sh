@@ -94,8 +94,12 @@ function iptablesGeneralRules
 	iptables -A OUTPUT -o lo -j ACCEPT
 
 	# Accept connections from/to VPN servers
-	iptables -A INPUT -s "$VPN_SERVER_IP" -j ACCEPT
-	iptables -A OUTPUT -d "$VPN_SERVER_IP" -j ACCEPT
+	while read line; do
+		read srvName srvIp srvPort <<< $line
+		
+		iptables -A INPUT -s "$srvIp" -j ACCEPT
+		iptables -A OUTPUT -d "$srvIp" -j ACCEPT
+	done < ./config/servers.conf
 
 	# Accept connections from/to local network
 	# TODO : auto detect local network
@@ -158,7 +162,7 @@ function startVPN
 {
 	echo "Start VPN daemon"
 
-	daemonPid=$(cat ./vpndaemon.pid 2> /dev/null)
+	daemonPid=$(cat /tmp/vpndaemon.pid 2> /dev/null)
 	if [ "$daemonPid" != "" ]; then
 		if ps ax | grep -v grep | grep "$daemonPid" > /dev/null; then
 			echo "VPN daemon already running..."
@@ -167,7 +171,7 @@ function startVPN
 	fi
 
 	nohup bash ./scripts/vpndaemon.sh > ./vpndaemon.log 2>&1 &
-	echo $! > ./vpndaemon.pid
+	echo $! > /tmp/vpndaemon.pid
 }
 
 # ------------------------------------------------
