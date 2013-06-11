@@ -172,7 +172,7 @@ function startVPN
 		fi
 	fi
 
-	nohup /tmp/vpnfiles/vpndaemon.sh > /tmp/vpnfiles/vpndaemon.log 2>&1 &
+	sudo nohup bash /tmp/vpnfiles/vpndaemon.sh > /tmp/vpnfiles/vpndaemon.log 2>&1 &
 	echo $! > /tmp/vpnfiles/vpndaemon.pid
 }
 
