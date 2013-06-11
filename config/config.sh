@@ -1,8 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR="/root/secure-vpn"
-
-source "$SCRIPT_DIR/../secure-vpn.conf"
+source "/root/secure-vpn.conf"
 
 #SYNOLOGY_IP="192.168.1.80"
 #SYNOLOGY_PORTS="1234"
