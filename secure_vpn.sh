@@ -4,7 +4,7 @@
 
 # TODO : 
 #   - knock knock on ports
-#   - 
+#   - automatically switch betweens servers if we cannot connect to one
 
 #########################################
 #                CONFIG                 #
