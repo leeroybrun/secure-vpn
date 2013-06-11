@@ -206,52 +206,52 @@ function writeFiles
 
 	# VPN daemon script
 	cat >> /tmp/vpnfiles/vpndaemon.sh << EOF
-		#!/bin/bash
-		
-		function getStatus {
-			ifconfig | grep "\$1" && return 1
-			return 0
-		}
+#!/bin/bash
 
-		while :
-		do
-			getStatus tun0
-			if [[ \$? == 0 ]]; then
-				echo "OpenVPN not connected ! Reconnecting..."
-				openvpn --config /tmp/vpnfiles/client.ovpn
+function getStatus {
+	ifconfig | grep "\$1" && return 1
+	return 0
+}
 
-				# Wait 1 minute before next check
-				sleep 60
-			else
-				# Already connected, next check in 5 minutes
-				sleep 300
-			fi
-		done
+while :
+do
+	getStatus tun0
+	if [[ \$? == 0 ]]; then
+		echo "OpenVPN not connected ! Reconnecting..."
+		openvpn --config /tmp/vpnfiles/client.ovpn
+
+		# Wait 1 minute before next check
+		sleep 60
+	else
+		# Already connected, next check in 5 minutes
+		sleep 300
+	fi
+done
 EOF
 	chmod +x /tmp/vpnfiles/vpndaemon.sh
 
 	cat >> /tmp/vpnfiles/raspberry_vpn_up.sh << EOF
-		#!/bin/bash
+#!/bin/bash
 
-		# Delete table 100 and flush all existing rules
-		ip route flush table 100
-		ip route flush cache
-		iptables -t mangle -F PREROUTING
+# Delete table 100 and flush all existing rules
+ip route flush table 100
+ip route flush cache
+iptables -t mangle -F PREROUTING
 
-		# Table 100 will route all traffic with mark 1 to WAN (no VPN)
-		ip route add default table 100 via $WAN_GATEWAY dev $WAN_INTERFACE
-		ip rule add fwmark 1 table 100
-		ip route flush cache
+# Table 100 will route all traffic with mark 1 to WAN (no VPN)
+ip route add default table 100 via $WAN_GATEWAY dev $WAN_INTERFACE
+ip rule add fwmark 1 table 100
+ip route flush cache
 
-		# Default behavious : all traffic via VPN
-		#iptables -t mangle -A PREROUTING -j MARK --set-mark 0
+# Default behavious : all traffic via VPN
+#iptables -t mangle -A PREROUTING -j MARK --set-mark 0
 
-		# SSH and Synology ports bypass VPN
-		#iptables -t mangle -A PREROUTING -p tcp -m multiport --dport "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j MARK --set-mark 1
+# SSH and Synology ports bypass VPN
+#iptables -t mangle -A PREROUTING -p tcp -m multiport --dport "$RASPBERRY_PORTS,$SYNOLOGY_PORT" -j MARK --set-mark 1
 
-		iptables -t mangle -A PREROUTING -p tcp --dport 22 -j MARK --set-mark 1
-        iptables -t mangle -A PREROUTING -p tcp --dport 16364 -j MARK --set-mark 1
-        iptables -t mangle -A PREROUTING -p tcp --dport 5225 -j MARK --set-mark 1
+iptables -t mangle -A PREROUTING -p tcp --dport 22 -j MARK --set-mark 1
+iptables -t mangle -A PREROUTING -p tcp --dport 16364 -j MARK --set-mark 1
+iptables -t mangle -A PREROUTING -p tcp --dport 5225 -j MARK --set-mark 1
 EOF
 	chmod +x /tmp/vpnfiles/raspberry_vpn_up.sh
 
