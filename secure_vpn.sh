@@ -169,7 +169,7 @@ function startVPN
 		fi
 	fi
 
-	(/tmp/vpnfiles/vpndaemon.sh &) &
+	nohup /tmp/vpnfiles/vpndaemon.sh > /tmp/vpnfiles/vpndaemon.log 2>&1 &
 	echo $! > /tmp/vpnfiles/vpndaemon.pid
 }
 
