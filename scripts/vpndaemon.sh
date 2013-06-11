@@ -10,7 +10,7 @@ do
 	getStatus tun0
 	if [[ $? == 0 ]]; then
 		echo "OpenVPN not connected ! Reconnecting..."
-		openvpn --config /tmp/vpnfiles/client.ovpn
+		openvpn --config /root/securevpn/config/client.ovpn
 
 		# Wait 1 minute before next check
 		sleep 60
