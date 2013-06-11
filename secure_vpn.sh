@@ -56,10 +56,6 @@ function main {
 		;;
 
 		stop)
-			iptables -P INPUT ACCEPT
-			iptables -P FORWARD ACCEPT
-			iptables -P OUTPUT ACCEPT
-
 			iptablesFlush
 
 			exit 0
@@ -76,6 +72,9 @@ function main {
 function iptablesFlush
 {
 	echo "Flush iptables"
+	iptables -P INPUT ACCEPT
+	iptables -P FORWARD ACCEPT
+	iptables -P OUTPUT ACCEPT
 	iptables -F
 	iptables -X
 	iptables -t nat -F
