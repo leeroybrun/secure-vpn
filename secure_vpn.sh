@@ -2,7 +2,9 @@
 
 # TorGuard Raspberry : http://torguard.net/knowledgebase.php?action=displayarticle&id=90
 
-# TODO : knock knock on ports
+# TODO : 
+#   - knock knock on ports
+#   - 
 
 #########################################
 #                CONFIG                 #
@@ -20,7 +22,7 @@ WAN_GATEWAY="192.168.1.1"
 
 VPN_USERNAME=""
 VPN_PASSWORD=""
-VPN_SERVER_IP="141.255.160.226"
+VPN_SERVER_IP="94.102.56.181"
 
 ##########################################
 #         DON'T EDIT LINES BELOW         #
