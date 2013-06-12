@@ -51,7 +51,7 @@ function writeOvpnConfig {
 # Get random server & write config
 # ------------------------------------------------
 getRandomServer
-writeOvpnConfigs
+writeOvpnConfig
 
 # ------------------------------------------------
 # Infinite loop for daemon - check if VPN is up
