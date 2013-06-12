@@ -1,9 +1,11 @@
 #!/bin/bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # ------------------------------------------------
 # Load config file
 # ------------------------------------------------
-source ./config/config.sh
+source $DIR/config/config.sh
 
 # ------------------------------------------------
 # Main
@@ -83,7 +85,7 @@ function iptablesRules
 				iptables -A OUTPUT -d "$srvIp" -j ACCEPT
 			fi
 		fi
-	done <./config/servers.conf
+	done < $DIR/config/servers.conf
 
 	# Accept connections from/to local network
 	#iptables -A INPUT -s "$LOCAL_NETWORK" -j ACCEPT
@@ -116,7 +118,7 @@ function startVPN
 		fi
 	fi
 
-	nohup bash ./scripts/vpndaemon.sh > ./vpndaemon.log 2>&1 &
+	nohup bash $DIR/scripts/vpndaemon.sh > $DIR/vpndaemon.log 2>&1 &
 	echo $! > /tmp/vpndaemon.pid
 }
 
