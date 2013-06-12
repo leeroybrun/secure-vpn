@@ -1,8 +1,8 @@
 #!/bin/bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DIR_CONF="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source $DIR/../../secure-vpn.conf
+source $DIR_CONF/../../secure-vpn.conf
 
 #OPEN_PORTS="1234"
 
