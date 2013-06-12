@@ -20,9 +20,13 @@ function getStatus {
 function getRandomServer {
 	randomServer=$(shuf -n 1 $DIR/../config/servers.conf)
 
-	if [ "$randomServer" != "$currentServer" ]; then
-		currentServer=$randomServer
-		read srvName srvIp srvPort <<< $currentServer
+	if [[ "$randomServer" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+$ ]]; then
+		if [ "$randomServer" != "$currentServer" ]; then
+			currentServer=$randomServer
+			read srvName srvIp srvPort <<< $currentServer
+		else
+			getRandomServer
+		fi
 	else
 		getRandomServer
 	fi

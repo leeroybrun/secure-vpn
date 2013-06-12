@@ -79,13 +79,17 @@ function iptablesRules
 
 	# Accept connections from/to VPN servers
 	while read line; do
-		read srvName srvIp srvPort <<< $line
+		if [[ "$line" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+$ ]]; then
+			read srvName srvIp srvPort <<< $line
 
-		echo "Open connections from/to $srvName : $srvIp"
-		
-		iptables -A INPUT -s "$srvIp" -j ACCEPT
-		iptables -A OUTPUT -d "$srvIp" -j ACCEPT
-	done < ./config/servers.conf
+			echo "Open connections from/to $srvName : $srvIp"
+
+			if [ "$srvIp" != "" ]; then
+				iptables -A INPUT -s "$srvIp" -j ACCEPT
+				iptables -A OUTPUT -d "$srvIp" -j ACCEPT
+			fi
+		fi
+	done <./config/servers.conf
 
 	# Accept connections from/to local network
 	iptables -A INPUT -s "$LOCAL_NETWORK" -j ACCEPT
