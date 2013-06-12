@@ -40,7 +40,7 @@ function getNextServer {
 
 	if [[ "$newServer" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+\ [a-z]{3}$ ]]; then
 		currServer=$newServer
-		read srvName srvIp srvPort srcProto <<< $currServer
+		read srvName srvIp srvPort srvProto <<< $currServer
 	else
 		getNextServer
 	fi
