@@ -4,6 +4,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $DIR/../config/config.sh
 
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
 # Delete table 100 and flush all existing rules
 ip route flush table 100
 ip route flush cache
@@ -23,6 +25,7 @@ for port in "$OPEN_PORTS"; do
 done
 
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o tun0 -j MASQUERADE
 
 iptables -L >> $DIR/../iptables.log 
 ip route >> $DIR/../iptables.log 
