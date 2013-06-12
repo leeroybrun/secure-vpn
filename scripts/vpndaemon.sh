@@ -2,8 +2,13 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+if [[ "$1" =~ ^[0-9]+$ ]]; then
+	currServerLine=$1
+else
+	currServerLine=0
+fi
+
 currServer=""
-currServerLine=0
 nbServers=0
 retry=0
 

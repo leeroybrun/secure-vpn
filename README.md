@@ -8,3 +8,4 @@ You can also add multiple VPN servers, so when the script cannot connect to one 
 - knock knock for ports opening
 - automatically switch betweens servers if we cannot connect to one
 - auto detect local network
+- test speed of different servers

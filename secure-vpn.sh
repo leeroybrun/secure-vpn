@@ -105,6 +105,8 @@ function iptablesRules
 
 # ------------------------------------------------
 # Start the VPN daemon
+# 	Parameters :
+#		$1 -> line number of server to use for VPN
 # ------------------------------------------------
 function startVPN
 {
@@ -118,7 +120,7 @@ function startVPN
 		fi
 	fi
 
-	nohup bash $DIR/scripts/vpndaemon.sh > $DIR/vpndaemon.log 2>&1 &
+	nohup bash $DIR/scripts/vpndaemon.sh "$1" > $DIR/vpndaemon.log 2>&1 &
 	echo $! > /tmp/vpndaemon.pid
 }
 
@@ -135,6 +137,13 @@ function stopVPN
 	kill "$daemonPid"
 
 	rm -f /tmp/vpndaemon.pid
+}
+
+# ------------------------------------------------
+# Test speeds of different servers in config
+# ------------------------------------------------
+function testSpeed {
+	
 }
 
 # Call the main function
