@@ -13,6 +13,7 @@ iptables -t mangle -F PREROUTING
 
 # Table 100 will route all traffic with mark 1 to WAN (no VPN)
 ip route add default via $WAN_GATEWAY dev $WAN_INTERFACE table 100
+ip route add table 100 to 91.121.166.0/24 dev eth0
 ip rule add from all fwmark 1 table 100
 ip route flush cache
 
