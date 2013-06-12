@@ -92,8 +92,8 @@ function iptablesRules
 	done <./config/servers.conf
 
 	# Accept connections from/to local network
-	iptables -A INPUT -s "$LOCAL_NETWORK" -j ACCEPT
-	iptables -A OUTPUT -d "$LOCAL_NETWORK" -j ACCEPT
+	#iptables -A INPUT -s "$LOCAL_NETWORK" -j ACCEPT
+	#iptables -A OUTPUT -d "$LOCAL_NETWORK" -j ACCEPT
 
 	# Disable Reverse Path Filtering on all network interfaces
 	for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
