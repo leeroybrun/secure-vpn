@@ -17,10 +17,6 @@ function main {
 
 			startVPN
 
-			# If it doesn't work, reboot after 20 minutes
-			sleep 1200
-			reboot
-
 			exit 0
 		;;
 
