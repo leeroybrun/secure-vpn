@@ -1,14 +1,14 @@
 #!/bin/bash
 
-source ./config/config.sh
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source $DIR/config/config.sh
 
 # ------------------------------------------------
 # Generate login.conf file
 # ------------------------------------------------
 	echo "$VPN_USERNAME
-	$VPN_PASSWORD" > ./config/login.conf
+	$VPN_PASSWORD" > $DIR/config/login.conf
 
 # ------------------------------------------------
 # Create file who will start VPN and add iptable
