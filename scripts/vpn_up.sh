@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source /root/secure-vpn/config/config.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source $DIR/../config/config.sh
 
 # Delete table 100 and flush all existing rules
 ip route flush table 100
