@@ -90,9 +90,9 @@ function iptablesRules
 	#iptables -A OUTPUT -d "$LOCAL_NETWORK" -j ACCEPT
 
 	# Disable Reverse Path Filtering on all network interfaces
-	for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
-		echo 0 > $i
-	done
+	#for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
+	#	echo 0 > $i
+	#done
 
 	# Open Raspberry ports
 	for port in $OPEN_PORTS; do
@@ -127,10 +127,10 @@ function stopVPN
 {
 	echo "Stop VPN daemon"
 
-	killall openvpn
+	pkill openvpn
 
 	daemonPid=$(cat ./vpndaemon.pid)
-	kill -p $daemonPid
+	kill $daemonPid
 
 	rm -f /tmp/vpndaemon.pid
 }
