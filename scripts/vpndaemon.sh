@@ -27,7 +27,11 @@ function getNextServer {
 		currServerLine=1
 	fi
 
+	echo "$nbServers $currServerLine"
+
 	newServer=$(sed -n '$[currServerLine]p' < $DIR/../config/servers.conf)
+
+	echo "$newServer"
 
 	if [[ "$newServer" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+$ ]]; then
 		currServer=$newServer
