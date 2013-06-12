@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source "/root/secure-vpn.conf"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source $DIR/../../secure-vpn.conf
 
 #OPEN_PORTS="1234"
 
