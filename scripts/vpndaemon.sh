@@ -36,8 +36,8 @@ function writeOvpnConfig {
 	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM OPTIONS ##" $DIR/../config/client.ovpn)
 
 	# Keep only first part of the file (remove "custom" options at the end)
-	head -n $startLine $DIR/config/client.ovpn > $DIR/../config/client.ovpn.tmp
-	mv $DIR/config/client.ovpn.tmp $DIR/../config/client.ovpn
+	head -n $startLine $DIR/../config/client.ovpn > $DIR/../config/client.ovpn.tmp
+	mv $DIR/../config/client.ovpn.tmp $DIR/../config/client.ovpn
 
 	# Add \n at the end of the file only if it doesn't already end in a newline
 	sed -i -e '$a\' $DIR/../config/client.ovpn
