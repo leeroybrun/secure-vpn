@@ -143,7 +143,7 @@ function stopVPN
 # Test speeds of different servers in config
 # ------------------------------------------------
 function testSpeed {
-	
+	echo "Speedtest of all configured servers"
 }
 
 # Call the main function
