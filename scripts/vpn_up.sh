@@ -18,9 +18,11 @@ ip route flush cache
 #iptables -t mangle -A PREROUTING -j MARK --set-mark 0
 
 for port in "$OPEN_PORTS"; do
-	echo "add port $port" >> $DIR/../vpndaemon.log
+	echo "add port $port" >> $DIR/../openports.log
 	iptables -t mangle -A PREROUTING -p tcp --dport $port -j MARK --set-mark 1
 done
+
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 iptables -L >> $DIR/../iptables.log 
 ip route >> $DIR/../iptables.log 
