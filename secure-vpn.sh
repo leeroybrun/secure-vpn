@@ -122,6 +122,8 @@ function startVPN
 {
 	echo "Start VPN daemon"
 
+	serverToStart="$1"
+
 	daemonPid=$(cat /tmp/vpndaemon.pid 2> /dev/null)
 	if [ "$daemonPid" != "" ]; then
 		if ps ax | grep -v grep | grep "$daemonPid" > /dev/null; then
@@ -130,7 +132,7 @@ function startVPN
 		fi
 	fi
 
-	nohup bash $DIR/scripts/vpndaemon.sh "$1" > $DIR/vpndaemon.log 2>&1 &
+	nohup bash $DIR/scripts/vpndaemon.sh "$serverToStart" > $DIR/vpndaemon.log 2>&1 &
 	echo $! > /tmp/vpndaemon.pid
 }
 
