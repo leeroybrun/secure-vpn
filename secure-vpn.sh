@@ -31,6 +31,10 @@ function main {
 		;;
 
 		speedtest)
+			iptablesFlush
+
+			iptablesRules
+			
 			speedtestAll
 
 			exit 0
