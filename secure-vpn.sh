@@ -34,7 +34,7 @@ function main {
 			iptablesFlush
 
 			iptablesRules
-			
+
 			speedtestAll
 
 			exit 0
@@ -163,6 +163,8 @@ function speedtestAll {
 		serverLine=$[serverLine + 1]
 
 		if [[ "$server" =~ SRV_LINE_FORMAT ]]; then
+			echo "Start test... ($server)"
+
 			startVPN "$serverLine"
 
 			sleep 10
@@ -172,10 +174,15 @@ function speedtestAll {
 			dlSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Download | grep -o [0-9]*\\.[0-9]*))
 			upSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Upload | grep -o [0-9]*\\.[0-9]*))
 
+			echo "Dl : $dlSpeed Mbits/s"
+			echo "Up : $upSpeed Mbits/s"
+
 			echo "$dlSpeed ($server)" >> /tmp/speedtestDlSpeeds.log
 			echo "$upSpeed ($server)" >> /tmp/speedtestUpSpeeds.log
 
 			stopVPN
+
+			echo "OK."
 		fi
 	done
 
