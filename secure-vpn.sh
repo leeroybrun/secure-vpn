@@ -133,6 +133,8 @@ function stopVPN
 
 	daemonPid=$(cat ./vpndaemon.pid)
 	kill -p $daemonPid
+
+	rm -f /tmp/vpndaemon.pid
 }
 
 # Call the main function
