@@ -63,7 +63,7 @@ function writeOvpnConfig {
 # ------------------------------------------------
 # Get random server & write config
 # ------------------------------------------------
-getnewServer
+getNextServer
 writeOvpnConfig
 
 # ------------------------------------------------
