@@ -85,7 +85,7 @@ function iptablesRules
 
 	# Accept connections from/to VPN servers
 	while read line; do
-		if [[ "$line" =~ SRV_LINE_FORMAT ]]; then
+		if [[ "$line" =~ $SRV_LINE_FORMAT ]]; then
 			read srvName srvIp srvPort srcProto <<< $line
 
 			echo "Open connections from/to $srvName : $srvIp $srvPort"
@@ -162,7 +162,7 @@ function speedtestAll {
 	while read server; do
 		serverLine=$[serverLine + 1]
 
-		if [[ "$server" =~ SRV_LINE_FORMAT ]]; then
+		if [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
 			echo "Start test... ($server)"
 
 			startVPN "$serverLine"

@@ -38,7 +38,7 @@ function getNextServer {
 	newServer=$(sed -n "$[currServerLine]p" < $DIR/../config/servers.conf)
 
 	# If new server line is correctly formated, parse server infos
-	if [[ "$newServer" =~ SRV_LINE_FORMAT ]]; then
+	if [[ "$newServer" =~ $SRV_LINE_FORMAT ]]; then
 		currServer=$newServer
 		read srvName srvIp srvPort srvProto <<< $currServer
 	# Else, get next server
