@@ -48,6 +48,12 @@ function writeOvpnConfig {
 }
 
 # ------------------------------------------------
+# Get random server & write config
+# ------------------------------------------------
+getRandomServer
+writeOvpnConfigs
+
+# ------------------------------------------------
 # Infinite loop for daemon - check if VPN is up
 # and restart it if needed. If can't connect to
 # VPN server after 3 retry, load new server config.
