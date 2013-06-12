@@ -15,6 +15,6 @@ ip route flush cache
 # Default behavious : all traffic via VPN
 #iptables -t mangle -A PREROUTING -j MARK --set-mark 0
 
-for port in "$RASPBERRY_PORTS $SYNOLOGY_PORTS"; do
+for port in "$OPEN_PORTS"; do
 	iptables -t mangle -A PREROUTING -p tcp --dport $port -j MARK --set-mark 1
 done

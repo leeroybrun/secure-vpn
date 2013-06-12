@@ -15,15 +15,7 @@ function main {
 		start)
 			iptablesFlush
 
-			iptablesDefault
-
-			if [[ "$LOCAL_IP" = "$SYNOLOGY_IP" ]]; then
-				synologyRules
-			elif [[ "$LOCAL_IP" = "$RASPBERRY_IP" ]]; then
-				raspberryRules
-			fi
-
-			iptablesGeneralRules
+			iptablesRules
 
 			startVPN
 
@@ -67,92 +59,48 @@ function iptablesFlush
 }
 
 # ------------------------------------------------
-# Set default chain policies
+# Add iptables rules
 # ------------------------------------------------
-function iptablesDefault
+function iptablesRules
 {
+	echo "General iptables rules"
+
 	iptables -P INPUT DROP
 	iptables -P FORWARD DROP
 	iptables -P OUTPUT DROP
-}
-
-# ------------------------------------------------
-# Add default rules, block all traffic except local & VPN
-# ------------------------------------------------
-function iptablesGeneralRules
-{
-	echo "General iptables rules"
 
 	# Accept packets through VPN
 	iptables -A INPUT -i tun+ -j ACCEPT
 	iptables -A OUTPUT -o tun+ -j ACCEPT
 
 	# Accept local connections
-	#iptables -A INPUT -s 127.0.0.1 -j ACCEPT
-	#iptables -A OUTPUT -d 127.0.0.1 -j ACCEPT
 	iptables -A INPUT -i lo -j ACCEPT
 	iptables -A OUTPUT -o lo -j ACCEPT
 
 	# Accept connections from/to VPN servers
 	while read line; do
 		read srvName srvIp srvPort <<< $line
+
+		echo "Open connections from/to $srvName : $srvIp"
 		
 		iptables -A INPUT -s "$srvIp" -j ACCEPT
 		iptables -A OUTPUT -d "$srvIp" -j ACCEPT
 	done < ./config/servers.conf
 
 	# Accept connections from/to local network
-	# TODO : auto detect local network
 	iptables -A INPUT -s "$LOCAL_NETWORK" -j ACCEPT
 	iptables -A OUTPUT -d "$LOCAL_NETWORK" -j ACCEPT
-
-	# Drop anything else...
-	#iptables -A INPUT -j DROP
-	#iptables -A OUTPUT -j DROP
-}
-
-# ------------------------------------------------
-# Specific rules for the Raspberry Pi
-# Route specific traffic without VPN & forward some packets to Synology
-# ------------------------------------------------
-function raspberryRules
-{
-	echo "Apply Raspberry Pi rules"
 
 	# Disable Reverse Path Filtering on all network interfaces
 	for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
 		echo 0 > $i
 	done
 
-	# Enable IP forwarding
-	echo "1" > /proc/sys/net/ipv4/ip_forward
-
-	# Redirect traffic from certains ports to Synology
-	# http://www.debuntu.org/how-to-redirecting-network-traffic-to-a-new-ip-using-iptables/
-	# http://www.ridinglinux.org/2008/05/21/simple-port-forwarding-with-iptables-in-linux/
-	iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-	for port in $SYNOLOGY_PORTS; do
-		iptables -I FORWARD -p tcp -d "$SYNOLOGY_IP" --dport "$port" -j ACCEPT
-		iptables -I FORWARD -p tcp -s "$SYNOLOGY_IP" --sport "$port" -j ACCEPT
-		iptables -t nat -A PREROUTING -p tcp --dport "$port" -j DNAT --to-destination "$SYNOLOGY_IP:$port"
-
-		iptables -A INPUT -p tcp --dport "$port" -j ACCEPT
-		iptables -A OUTPUT -p tcp --sport "$port" -j ACCEPT
-	done
-
 	# Open Raspberry ports
-	for port in $RASPBERRY_PORTS; do
+	for port in $OPEN_PORTS; do
 		iptables -A INPUT -p tcp --dport "$port" -j ACCEPT
 		iptables -A OUTPUT -p tcp --sport "$port" -j ACCEPT
 	done
-}
-
-# ------------------------------------------------
-# Specific rules for the Synology
-# ------------------------------------------------
-function synologyRules
-{
-	echo "Apply Synology Rules"
 }
 
 # ------------------------------------------------
