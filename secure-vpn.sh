@@ -188,6 +188,14 @@ function speedtestAll {
 
 	sort -r -o /tmp/speedtestDlSpeeds.log /tmp/speedtestDlSpeeds.log
 	sort -r -o /tmp/speedtestUpSpeeds.log /tmp/speedtestUpSpeeds.log
+
+	echo "All done !"
+
+	echo "10 best DL servers :"
+	head -10 /tmp/speedtestDlSpeeds.log
+
+	echo "10 best UP servers :"
+	head -10 /tmp/speedtestUpSpeeds.log
 }
 
 # Call the main function
