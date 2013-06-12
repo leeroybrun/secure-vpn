@@ -169,6 +169,7 @@ function speedtestAll {
 
 			sleep 10
 
+			echo "Start Speedtest..."
 			speedTestResult=$($SPEEDTEST_CLI --simple)
 
 			dlSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Download | grep -o [0-9]*\\.[0-9]*))
