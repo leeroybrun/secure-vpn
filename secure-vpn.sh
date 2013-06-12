@@ -129,8 +129,8 @@ function stopVPN
 
 	pkill openvpn
 
-	daemonPid=$(cat ./vpndaemon.pid)
-	kill $daemonPid
+	daemonPid=$(cat /tmp/vpndaemon.pid)
+	kill "$daemonPid"
 
 	rm -f /tmp/vpndaemon.pid
 }

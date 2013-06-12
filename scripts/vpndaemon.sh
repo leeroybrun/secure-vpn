@@ -29,7 +29,7 @@ function getNextServer {
 
 	echo "$nbServers $currServerLine"
 
-	newServer=$(sed -n '$[currServerLine]p' < $DIR/../config/servers.conf)
+	newServer=$(sed -n "$[currServerLine]p" < $DIR/../config/servers.conf)
 
 	echo "$newServer"
 
