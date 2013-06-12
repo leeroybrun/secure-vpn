@@ -33,9 +33,9 @@ function getNextServer {
 
 	echo "$newServer"
 
-	if [[ "$newServer" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+$ ]]; then
+	if [[ "$newServer" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+\ [a-z]{3}$ ]]; then
 		currServer=$newServer
-		read srvName srvIp srvPort <<< $currServer
+		read srvName srvIp srvPort srcProto <<< $currServer
 	else
 		getNextServer
 	fi
@@ -56,6 +56,7 @@ function writeOvpnConfig {
 	sed -i -e '$a\' $DIR/../config/client.ovpn
 
 	# Write server config to file
+	echo "proto $srvProto" >> $DIR/../config/client.ovpn
 	echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
 	echo "ca $DIR/../config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
 }

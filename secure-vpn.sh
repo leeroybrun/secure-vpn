@@ -75,8 +75,8 @@ function iptablesRules
 
 	# Accept connections from/to VPN servers
 	while read line; do
-		if [[ "$line" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+$ ]]; then
-			read srvName srvIp srvPort <<< $line
+		if [[ "$line" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+\ [a-z]{3}$ ]]; then
+			read srvName srvIp srvPort srcProto <<< $line
 
 			echo "Open connections from/to $srvName : $srvIp $srvPort"
 
