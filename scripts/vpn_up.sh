@@ -21,3 +21,8 @@ for port in "$OPEN_PORTS"; do
 	echo "add port $port" >> $DIR/../vpndaemon.log
 	iptables -t mangle -A PREROUTING -p tcp --dport $port -j MARK --set-mark 1
 done
+
+iptables -L >> $DIR/../iptables.log 
+ip route >> $DIR/../iptables.log 
+ip route show table 100 >> $DIR/../iptables.log 
+ip rule show >> $DIR/../iptables.log 
