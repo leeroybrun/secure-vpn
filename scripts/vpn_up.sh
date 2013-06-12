@@ -12,16 +12,20 @@ ip route flush cache
 iptables -t mangle -F PREROUTING
 
 # Table 100 will route all traffic with mark 1 to WAN (no VPN)
-ip route add default table 100 via $WAN_GATEWAY dev $WAN_INTERFACE
-ip rule add fwmark 1 table 100
+ip route add default via $WAN_GATEWAY dev $WAN_INTERFACE table 100
+ip rule add from all fwmark 1 table 100
 ip route flush cache
 
 # Default behavious : all traffic via VPN
 #iptables -t mangle -A PREROUTING -j MARK --set-mark 0
 
 for port in "$OPEN_PORTS"; do
-	echo "add port $port" >> $DIR/../openports.log
-	iptables -t mangle -A PREROUTING -p tcp --dport $port -j MARK --set-mark 1
+	echo "add port $port"
+	iptables -A PREROUTING -t mangle -p tcp --dport $port -j MARK --set-mark 1
+	iptables -A PREROUTING -t mangle -i eth0 -p tcp --dport $port -j MARK --set-mark 1
+
+	iptables -A PREROUTING -t mangle -p tcp --sport $port -j MARK --set-mark 1
+	iptables -A PREROUTING -t mangle -i eth0 -p tcp --sport $port -j MARK --set-mark 1
 done
 
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
