@@ -184,7 +184,7 @@ function speedtestAll {
 
 			echo "OK."
 		fi
-	done
+	done < $DIR/config/servers.conf
 
 	sort -r -o /tmp/speedtestDlSpeeds.log /tmp/speedtestDlSpeeds.log
 	sort -r -o /tmp/speedtestUpSpeeds.log /tmp/speedtestUpSpeeds.log
