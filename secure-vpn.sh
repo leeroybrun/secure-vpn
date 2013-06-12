@@ -76,7 +76,7 @@ function iptablesRules
 		if [[ "$line" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+$ ]]; then
 			read srvName srvIp srvPort <<< $line
 
-			echo "Open connections from/to $srvName : $srvIp"
+			echo "Open connections from/to $srvName : $srvIp $srvPort"
 
 			if [ "$srvIp" != "" ]; then
 				iptables -A INPUT -s "$srvIp" -j ACCEPT
@@ -90,11 +90,11 @@ function iptablesRules
 	#iptables -A OUTPUT -d "$LOCAL_NETWORK" -j ACCEPT
 
 	# Disable Reverse Path Filtering on all network interfaces
-	#for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
-	#	echo 0 > $i
-	#done
+	for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
+		echo 0 > $i
+	done
 
-	# Open Raspberry ports
+	# Open allowed ports ports
 	for port in $OPEN_PORTS; do
 		iptables -A INPUT -p tcp --dport "$port" -j ACCEPT
 		iptables -A OUTPUT -p tcp --sport "$port" -j ACCEPT

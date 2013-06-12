@@ -2,7 +2,9 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-currentServer=""
+currServer=""
+currServerLine=0
+nbServers=0
 retry=0
 
 # ------------------------------------------------
@@ -14,21 +16,24 @@ function getStatus {
 }
 
 # ------------------------------------------------
-# Get random server from config file and check if
-# it was not already the previous one
+# Get next server from config file
 # ------------------------------------------------
-function getRandomServer {
-	randomServer=$(shuf -n 1 $DIR/../config/servers.conf)
+function getNextServer {
+	nbServers=$(wc -l < $DIR/../config/servers.conf)
 
-	if [[ "$randomServer" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+$ ]]; then
-		if [ "$randomServer" != "$currentServer" ]; then
-			currentServer=$randomServer
-			read srvName srvIp srvPort <<< $currentServer
-		else
-			getRandomServer
-		fi
+	currServerLine=$[currServerLine + 1]
+
+	if [ $currServerLine -gt $nbServers ]; then
+		currServerLine=1
+	fi
+
+	newServer=$(sed -n '$[currServerLine]p' < $DIR/../config/servers.conf)
+
+	if [[ "$newServer" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+$ ]]; then
+		currServer=$newServer
+		read srvName srvIp srvPort <<< $currServer
 	else
-		getRandomServer
+		getNextServer
 	fi
 }
 
@@ -54,7 +59,7 @@ function writeOvpnConfig {
 # ------------------------------------------------
 # Get random server & write config
 # ------------------------------------------------
-getRandomServer
+getnewServer
 writeOvpnConfig
 
 # ------------------------------------------------
@@ -73,9 +78,9 @@ do
 		if [ "$retry" -eq "3" ]; then
 			echo "Tried 3 times connecting to $srvName. Get new random server..."
 
-			getRandomServer
+			getNextServer
 
-			echo "New server : $currentServer"
+			echo "New server : $currServer"
 
 			echo "Write OpenVPN config file..."
 

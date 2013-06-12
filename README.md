@@ -1,9 +1,8 @@
 # Secure VPN scripts
-Scripts used to etablish a secure VPN connection and block traffic not going via the VPN.
-
+Script used to etablish a secure VPN connection and block all traffic not going via the VPN.
 You can define some ports to bypass the VPN.
 
-This script is used with a Raspberry Pi and a Synology, the two are connected to the VPN. Open ports on the Synology transit via the Raspberry because iproute2/kernel on the Synology isn't compiled with full functionnalities (no rules) and I wanted to leave it "standard" to not have surprises during updates :-).
+You can also add multiple VPN servers, so when the script cannot connect to one server, it will try the next one.
 
 ## Todo :
 - knock knock for ports opening
