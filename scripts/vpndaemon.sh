@@ -44,7 +44,7 @@ function writeOvpnConfig {
 
 	# Write server config to file
 	echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
-	echo "ca $DIR/config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
+	echo "ca $DIR/../config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
 }
 
 # ------------------------------------------------
