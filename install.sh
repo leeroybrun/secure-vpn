@@ -41,7 +41,7 @@ EOF
 
 	# Write paths config to file
 	echo "auth-user-pass $DIR/config/login.conf" >> $DIR/config/client.ovpn
-	echo "up $DIR/scripts/vpn_up.sh" >> $DIR/config/client.ovpn
+	echo "route-up $DIR/scripts/vpn_up.sh" >> $DIR/config/client.ovpn
 	echo "" >> $DIR/config/client.ovpn
 	echo "### CUSTOM OPTIONS ###" >> $DIR/config/client.ovpn
 
