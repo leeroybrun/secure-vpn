@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 function getStatus {
 	ifconfig | grep "$1" && return 1
 	return 0
@@ -10,7 +12,7 @@ do
 	getStatus tun0
 	if [[ $? == 0 ]]; then
 		echo "OpenVPN not connected ! Reconnecting..."
-		openvpn --config /root/secure-vpn/config/client.ovpn
+		openvpn --config $DIR/../config/client.ovpn
 
 		# Wait 1 minute before next check
 		sleep 60
