@@ -24,23 +24,24 @@ function getStatus {
 # Get next server from config file
 # ------------------------------------------------
 function getNextServer {
+	# Get number of servers in config
 	nbServers=$(wc -l < $DIR/../config/servers.conf)
 
 	currServerLine=$[currServerLine + 1]
 
+	# Current server doesn't exist (number gt nbServers)
 	if [ $currServerLine -gt $nbServers ]; then
 		currServerLine=1
 	fi
 
-	echo "$nbServers $currServerLine"
-
+	# Get new server line from config
 	newServer=$(sed -n "$[currServerLine]p" < $DIR/../config/servers.conf)
 
-	echo "$newServer"
-
-	if [[ "$newServer" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+\ [a-z]{3}$ ]]; then
+	# If new server line is correctly formated, parse server infos
+	if [[ "$newServer" =~ SRV_LINE_FORMAT ]]; then
 		currServer=$newServer
 		read srvName srvIp srvPort srvProto <<< $currServer
+	# Else, get next server
 	else
 		getNextServer
 	fi

@@ -30,6 +30,12 @@ function main {
 			exit 0
 		;;
 
+		speedtest)
+			speedtestAll
+
+			exit 0
+		;;
+
 		*)
 			echo "Usage : $0 {start|stop}"
 			exit 1
@@ -75,7 +81,7 @@ function iptablesRules
 
 	# Accept connections from/to VPN servers
 	while read line; do
-		if [[ "$line" =~ ^[a-zA-Z0-9]+\ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\ [0-9]+\ [a-z]{3}$ ]]; then
+		if [[ "$line" =~ SRV_LINE_FORMAT ]]; then
 			read srvName srvIp srvPort srcProto <<< $line
 
 			echo "Open connections from/to $srvName : $srvIp $srvPort"
@@ -142,8 +148,35 @@ function stopVPN
 # ------------------------------------------------
 # Test speeds of different servers in config
 # ------------------------------------------------
-function testSpeed {
+function speedtestAll {
 	echo "Speedtest of all configured servers"
+
+	# Set variable to use . in floating vars
+	export LC_NUMERIC="en_US.UTF-8"
+
+	serverLine=0
+	while read server; do
+		serverLine=$[serverLine + 1]
+
+		if [[ "$server" =~ SRV_LINE_FORMAT ]]; then
+			startVPN "$serverLine"
+
+			sleep 10
+
+			speedTestResult=$($SPEEDTEST_CLI --simple)
+
+			dlSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Download | grep -o [0-9]*\\.[0-9]*))
+			upSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Upload | grep -o [0-9]*\\.[0-9]*))
+
+			echo "$dlSpeed ($server)" >> /tmp/speedtestDlSpeeds.log
+			echo "$upSpeed ($server)" >> /tmp/speedtestUpSpeeds.log
+
+			stopVPN
+		fi
+	done
+
+	sort -r -o /tmp/speedtestDlSpeeds.log /tmp/speedtestDlSpeeds.log
+	sort -r -o /tmp/speedtestUpSpeeds.log /tmp/speedtestUpSpeeds.log
 }
 
 # Call the main function
