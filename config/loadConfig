@@ -7,10 +7,11 @@ TMP_DIR="/tmp/secure-vpn"
 
 DIRC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# If config file doesn't exist, call install script
-if ! [ -f "$CONFIG_DIR/config" ]; then
-	"$DIRC/../install" config
+# If config file exist, include it
+if [ -f "$CONFIG_DIR/config" ]; then
+	# Load config file
+	source "$CONFIG_DIR/config"
+	CONFIG_SET=1
+else
+	CONFIG_SET=0
 fi
-
-# Load config file
-source "$CONFIG_DIR/config"
