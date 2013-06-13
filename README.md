@@ -1,10 +1,10 @@
 # Secure VPN scripts
 Script used to establish a secure VPN connection and block all traffic not going via the VPN.
-You can define some ports to bypass the VPN.
+You can define some ports that will bypass the VPN (SSH, etc).
 
 You can also add multiple VPN servers, so when the script cannot connect to one server, it will try the next one.
 
-The script allow you to speedtest all VPN servers listed in config to find the fastest one.
+The script allow you to speedtest all VPN servers listed in config to find the fastest ones. It will then reorder your servers' config file accordingly.
 
 ## Installation
 Clone this repository where you want the script to live :
