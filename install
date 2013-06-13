@@ -42,6 +42,8 @@ function makePersist {
 EOF
 
 	chmod +x /etc/network/if-up.d/secure-vpn
+
+	echo "Secure VPN will now start every time your network goes up."
 }
 
 # ------------------------------------------------
@@ -51,14 +53,17 @@ EOF
 function installConfig {
 	# If config dir already exist, prompt user to remove it
 	if [ -d "$CONFIG_DIR" ]; then
-		read -p "Config dir already exists. Remove & recreate it ? (y/n)?"
+		read -p "Config dir already exists. Remove & recreate it ? (y/n) "
 		if [ "$REPLY" == "y" ]; then
+			echo "Removing old folder..."
 			rm -rf "$CONFIG_DIR"
 		else
 			echo "Exiting..."
 			exit 1
 		fi
 	fi
+
+	echo "Creating config folder..."
 
 	mkdir "$CONFIG_DIR"
 
@@ -80,6 +85,8 @@ function installConfig {
 	echo "route-up $DIR/scripts/vpn_up.sh" >> "$CONFIG_DIR/client.ovpn"
 	echo "" >> "$CONFIG_DIR/client.ovpn"
 	echo "### CUSTOM OPTIONS ###" >> "$CONFIG_DIR/client.ovpn"
+
+	echo "Config folder created ! Please now edit $CONFIG_DIR/config, $CONFIG_DIR/login.conf & other needed files."
 }
 
 # Call main function
