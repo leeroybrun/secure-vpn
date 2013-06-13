@@ -18,8 +18,8 @@ fi
 # Main
 # ------------------------------------------------
 function main {
-	# Create tmp directory if not exists
-	if [ -d "$TMP_DIR" ]; then
+	# Create tmp directory if it don't exists
+	if ! [ -d "$TMP_DIR" ]; then
 		mkdir "$TMP_DIR"
 	fi
 
