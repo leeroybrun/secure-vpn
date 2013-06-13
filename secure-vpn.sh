@@ -188,8 +188,12 @@ function speedtestAll {
 	iptablesFlush
 
 	# Test speed without VPN
+	echo "Start test... (without vpn)"
 	speedtest "without VPN"
 	logSpeedtest
+
+	# Apply rules to block traffic not in VPN
+	iptablesRules
 
 	# Loop over all servers
 	serverLine=0
