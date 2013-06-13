@@ -37,7 +37,7 @@ function writeAllServersConf {
 		read srvName srvIp srvPort srvProto <<< $server
 
 		# If server line is not correctly formated, exit
-		if ![[ "$server" =~ $SRV_LINE_FORMAT ]]; then
+		if ! [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
 			exit 1
 		fi
 
@@ -76,7 +76,7 @@ function writeOneServerConf {
 	server=$(sed -n "$[currServerLine]p" < "$CONFIG_DIR/servers.conf")
 
 	# If server line is not correctly formated, exit
-	if ![[ "$server" =~ $SRV_LINE_FORMAT ]]; then
+	if ! [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
 		exit 1
 	fi
 
