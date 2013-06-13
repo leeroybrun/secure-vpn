@@ -236,7 +236,7 @@ function speedtestAll {
 
 			# Check if VPN connected, if not -> stop and go to the next server
 			getStatus "$srvIp"
-			if [[ $? == 1 ]]; then
+			if [[ $? == 0 ]]; then
 				echo "VPN failed to connect... Next server."
 				stopVPN
 				continue
