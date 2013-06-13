@@ -23,9 +23,13 @@ function main {
 		;;
 
 		stop)
-			iptablesFlush
-
 			stopVPN
+
+			exit 0
+		;;
+
+		flush-iptables)
+			iptablesFlush
 
 			exit 0
 		;;
@@ -41,7 +45,7 @@ function main {
 		;;
 
 		*)
-			echo "Usage : $0 {start|stop}"
+			echo "Usage : $0 {start|stop|speedtest|flush-iptables}"
 			exit 1
 		;;
 	esac
@@ -86,7 +90,7 @@ function iptablesRules
 	# Accept connections from/to VPN servers
 	while read line; do
 		if [[ "$line" =~ $SRV_LINE_FORMAT ]]; then
-			read srvName srvIp srvPort srcProto <<< $line
+			read srvName srvIp srvPort srvProto <<< $line
 
 			echo "Open connections from/to $srvName : $srvIp $srvPort"
 
@@ -111,6 +115,16 @@ function iptablesRules
 		iptables -A INPUT -p tcp --dport "$port" -j ACCEPT
 		iptables -A OUTPUT -p tcp --sport "$port" -j ACCEPT
 	done
+}
+
+
+
+# ------------------------------------------------
+# Get status of VPN connection
+# ------------------------------------------------
+function getStatus {
+	ifconfig | grep "$1" && return 1
+	return 0
 }
 
 # ------------------------------------------------
@@ -160,28 +174,39 @@ function speedtestAll {
 	# Set variable to use . in floating vars
 	export LC_NUMERIC="en_US.UTF-8"
 
+	# Empty log files
+	echo "" > /tmp/speedtestDlSpeeds.log
+	echo "" > /tmp/speedtestUpSpeeds.log
+
+	# If VPN connected, stop it
+	getStatus tun0
+	if [[ $? == 1 ]]; then
+		stopVPN
+	fi
+
+	# FLush iptables for testing speed without VPN
+	iptablesFlush
+
+	# Test speed without VPN
+	speedtest "without VPN"
+	logSpeedtest
+
+	# Loop over all servers
 	serverLine=0
 	while read server; do
 		serverLine=$[serverLine + 1]
 
+		# Check server config format
 		if [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
 			echo "Start test... ($server)"
 
 			startVPN "$serverLine"
 
-			sleep 10
+			# Wait for the VPN to connect
+			sleep 5
 
-			echo "Start Speedtest..."
-			speedTestResult=$($SPEEDTEST_CLI --simple)
-
-			dlSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Download | grep -o [0-9]*\\.[0-9]*))
-			upSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Upload | grep -o [0-9]*\\.[0-9]*))
-
-			echo "Dl : $dlSpeed Mbits/s"
-			echo "Up : $upSpeed Mbits/s"
-
-			echo "$dlSpeed ($server)" >> /tmp/speedtestDlSpeeds.log
-			echo "$upSpeed ($server)" >> /tmp/speedtestUpSpeeds.log
+			speedtest "$server"
+			logSpeedtest
 
 			stopVPN
 
@@ -189,16 +214,42 @@ function speedtestAll {
 		fi
 	done < $DIR/config/servers.conf
 
+	# Sort results
 	sort -r -o /tmp/speedtestDlSpeeds.log /tmp/speedtestDlSpeeds.log
 	sort -r -o /tmp/speedtestUpSpeeds.log /tmp/speedtestUpSpeeds.log
 
 	echo "All done !"
 
+	# Show best servers
 	echo "10 best DL servers :"
 	head -10 /tmp/speedtestDlSpeeds.log
 
 	echo "10 best UP servers :"
 	head -10 /tmp/speedtestUpSpeeds.log
+}
+
+# ------------------------------------------------
+# Launch speedtest and save results in log files
+# ------------------------------------------------
+function speedtest {
+	server="$1"
+
+	echo "Start Speedtest..."
+	speedTestResult=$($SPEEDTEST_CLI --simple)
+
+	dlSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Download | grep -o [0-9]*\\.[0-9]*))
+	upSpeed=$(printf %03.2f $(echo "$speedTestResult" | grep ^Upload | grep -o [0-9]*\\.[0-9]*))
+
+	echo "Dl : $dlSpeed Mbits/s"
+	echo "Up : $upSpeed Mbits/s"
+}
+
+# ------------------------------------------------
+# Log the last speedtest result
+# ------------------------------------------------
+function logSpeedtest {
+	echo "$dlSpeed ($server)" >> /tmp/speedtestDlSpeeds.log
+	echo "$upSpeed ($server)" >> /tmp/speedtestUpSpeeds.log
 }
 
 # Call the main function
