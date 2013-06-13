@@ -183,6 +183,9 @@ function speedtestAll {
 	# FLush iptables for testing speed without VPN
 	iptablesFlush
 
+	echo ""
+	echo "-------------------------------------------"
+
 	# Test speed without VPN
 	echo "Start test... (without vpn)"
 	speedtest "without VPN"
@@ -198,6 +201,8 @@ function speedtestAll {
 
 		# Check server config format
 		if [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
+			echo ""
+			echo "-------------------------------------------"
 			echo "Start test... ($server)"
 
 			startVPN "$serverLine"
