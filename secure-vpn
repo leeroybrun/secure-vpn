@@ -139,7 +139,7 @@ function getStatus {
 			return 1
 		fi
 
-		currentIp=$(curl http://httpbin.org/ip)
+		currentIp=$(curl --silent http://httpbin.org/ip)
 
 		if [[ "$currentIp" == *"$currentServer"* ]]; then
 			echo "Status: connected"
