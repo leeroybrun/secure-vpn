@@ -205,6 +205,14 @@ function speedtestAll {
 			# Wait for the VPN to connect
 			sleep 5
 
+			# Check if VPN connected, if not -> stop and go to the next server
+			getStatus tun0
+			if [[ $? == 1 ]]; then
+				echo "VPN failed to connect... Next server."
+				stopVPN
+				continue
+			fi
+
 			speedtest "$server"
 			logSpeedtest
 
