@@ -19,7 +19,7 @@ Then you need to call the installer to copy all config files inside `/etc/secure
 sudo ./install config
 ```
 
-You can now customize the config files inside `/etc/secure-vpn/`, specially `config`, `servers.conf` and place your VPN servers certificates inside `certs/`.
+You can now customize the config files inside `/etc/secure-vpn/`, specially `config`, `servers.conf` and place your VPN servers' certificates inside `certs/`.
 If your server need custom OpenVPN settings, you can edit the `client.ovpn` file.
 
 When all settings are ready, you can make the script start every time your network goes up :
