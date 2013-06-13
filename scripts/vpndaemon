@@ -36,14 +36,16 @@ function writeAllServersConf {
 	while read server; do
 		read srvName srvIp srvPort srvProto <<< $server
 
-		# If server line is not correctly formated, exit
+		# If server line is not correctly formated, continue to next line
 		if ! [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
-			return 0
+			echo "'$server' is not in the good format"
+			continue
 		fi
 
-		# If server protocol is not the one in config, exit
+		# If server protocol is not the one in config, continue to next line
 		if [[ "$srvProto" != $VPN_PROTO ]]; then
-			return 0
+			echo "$srvProto is not $VPN_PROTO"
+			continue
 		fi
 
 		echo "remote $srvIp $srvPort" >> "$CONFIG_DIR/client.ovpn"
