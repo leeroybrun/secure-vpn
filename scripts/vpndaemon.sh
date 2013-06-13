@@ -23,7 +23,7 @@ function writeAllServersConf {
 	while read server; do
 		read srvName srvIp srvPort srvProto <<< $server
 
-		echo "remote $srvIp $srvPort $srvProto" >> $DIR/../config/client.ovpn
+		echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
 
 		# Only include cert if not already done
 		if [[ ${loadedCerts[$srvName]} != 1 ]]; then
@@ -58,7 +58,7 @@ function writeOneServerConf {
 
 		# Write server config to file
 		echo "proto $srvProto" >> $DIR/../config/client.ovpn
-		echo "remote $srvIp $srvPort $srvProto" >> $DIR/../config/client.ovpn
+		echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
 		echo "ca $DIR/../config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
 	# Else, exit
 	else
