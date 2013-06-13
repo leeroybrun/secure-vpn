@@ -2,6 +2,9 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Load config
+source "$DIR/../config/loadConfig"
+
 # ------------------------------------------------
 # Get status of VPN connection
 # ------------------------------------------------
@@ -17,7 +20,7 @@ function writeAllServersConf {
 	emptyServersConfig
 
 	# Write protocol
-	echo "proto $VPN_PROTO" >> $DIR/../config/client.ovpn
+	echo "proto $VPN_PROTO" >> "$CONFIG_DIR/client.ovpn"
 
 	# Declare associative array
 	declare -A loadedCerts
@@ -36,14 +39,14 @@ function writeAllServersConf {
 			exit 1
 		fi
 
-		echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
+		echo "remote $srvIp $srvPort" >> "$CONFIG_DIR/client.ovpn"
 
 		# Only include cert if not already done
 		if [[ ${loadedCerts[$srvName]} != 1 ]]; then
 			loadedCerts[$srvName]=1
-			echo "ca $DIR/../config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
+			echo "ca $CONFIG_DIR/certs/$srvName.crt" >> "$CONFIG_DIR/client.ovpn"
 		fi
-	done < $DIR/../config/servers.conf
+	done < "$CONFIG_DIR/servers.conf"
 }
 
 # ------------------------------------------------
@@ -53,7 +56,7 @@ function writeOneServerConf {
 	emptyServersConfig
 
 	# Get number of servers in config
-	nbServers=$(wc -l < $DIR/../config/servers.conf)
+	nbServers=$(wc -l < "$CONFIG_DIR/servers.conf")
 
 	currServerLine=$1
 
@@ -63,7 +66,7 @@ function writeOneServerConf {
 	fi
 
 	# Get server line from config
-	server=$(sed -n "$[currServerLine]p" < $DIR/../config/servers.conf)
+	server=$(sed -n "$[currServerLine]p" < "$CONFIG_DIR/servers.conf")
 
 	# If server line is not correctly formated, exit
 	if ![[ "$server" =~ $SRV_LINE_FORMAT ]]; then
@@ -74,9 +77,9 @@ function writeOneServerConf {
 	read srvName srvIp srvPort srvProto <<< $server
 
 	# Write server config to file
-	echo "proto $srvProto" >> $DIR/../config/client.ovpn
-	echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
-	echo "ca $DIR/../config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
+	echo "proto $srvProto" >> "$CONFIG_DIR/client.ovpn"
+	echo "remote $srvIp $srvPort" >> "$CONFIG_DIR/client.ovpn"
+	echo "ca $CONFIG_DIR/certs/$srvName.crt" >> "$CONFIG_DIR/client.ovpn"
 }
 
 # ------------------------------------------------
@@ -84,14 +87,14 @@ function writeOneServerConf {
 # ------------------------------------------------
 function emptyServersConfig {
 	# Get line where the fun starts
-	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM OPTIONS ##" $DIR/../config/client.ovpn)
+	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM OPTIONS ##" "$CONFIG_DIR/client.ovpn")
 
 	# Keep only first part of the file (remove "custom" options at the end)
-	head -n $startLine $DIR/../config/client.ovpn > $DIR/../config/client.ovpn.tmp
-	mv $DIR/../config/client.ovpn.tmp $DIR/../config/client.ovpn
+	head -n $startLine "$CONFIG_DIR/client.ovpn" > "$CONFIG_DIR/client.ovpn.tmp"
+	mv "$CONFIG_DIR/client.ovpn.tmp" "$CONFIG_DIR/client.ovpn"
 
 	# Add \n at the end of the file only if it doesn't already end in a newline
-	sed -i -e '$a\' $DIR/../config/client.ovpn
+	sed -i -e '$a\' "$CONFIG_DIR/client.ovpn"
 }
 
 # ------------------------------------------------
@@ -118,7 +121,7 @@ do
 
 		echo "Connection to server..."
 
-		openvpn --config $DIR/../config/client.ovpn
+		openvpn --config "$CONFIG_DIR/client.ovpn"
 
 		# Wait 1 minute before next check
 		sleep 60

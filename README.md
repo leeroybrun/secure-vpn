@@ -13,7 +13,7 @@ Clone this repository where you want the script to live :
 git clone git://github.com/leeroybrun/secure-vpn.git
 ```
 
-Then customize the `config/config.sh`, `config/servers.conf` and place your VPN servers certificates inside `config/certs/`.
+Then customize the `config/config`, `config/servers.conf` and place your VPN servers certificates inside `config/certs/`.
 If your server need custom OpenVPN settings, cou can edit the `config/client.ovpn` file.
 
 When all settings are ready, call the install script :

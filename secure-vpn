@@ -5,12 +5,17 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # ------------------------------------------------
 # Load config file
 # ------------------------------------------------
-source $DIR/config/config.sh
+source "$DIR/config/loadConfig"
 
 # ------------------------------------------------
 # Main
 # ------------------------------------------------
 function main {
+	# Create tmp directory if not exists
+	if [ -d "$TMP_DIR" ]; then
+		mkdir "$TMP_DIR"
+	fi
+
 	case "$1" in
 		start)
 			iptablesFlush
@@ -95,7 +100,7 @@ function iptablesRules
 				iptables -A OUTPUT -d "$srvIp" -j ACCEPT
 			fi
 		fi
-	done < $DIR/config/servers.conf
+	done < "$CONFIG_DIR/servers.conf"
 
 	# Accept connections from/to local network
 	#iptables -A INPUT -s "$LOCAL_NETWORK" -j ACCEPT
@@ -153,7 +158,7 @@ function startVPN
 
 	serverToStart="$1"
 
-	daemonPid=$(cat /tmp/vpndaemon.pid 2> /dev/null)
+	daemonPid=$(cat "$TMP_DIR/vpndaemon.pid" 2> /dev/null)
 	if [ "$daemonPid" != "" ]; then
 		if ps ax | grep -v grep | grep "$daemonPid" > /dev/null; then
 			echo "VPN daemon already running..."
@@ -161,8 +166,8 @@ function startVPN
 		fi
 	fi
 
-	nohup bash $DIR/scripts/vpndaemon.sh "$serverToStart" > $DIR/vpndaemon.log 2>&1 &
-	echo $! > /tmp/vpndaemon.pid
+	nohup bash "$DIR/scripts/vpndaemon" "$serverToStart" > "$DIR/vpndaemon.log" 2>&1 &
+	echo $! > "$TMP_DIR/vpndaemon.pid"
 }
 
 # ------------------------------------------------
@@ -174,10 +179,10 @@ function stopVPN
 
 	pkill openvpn
 
-	daemonPid=$(cat /tmp/vpndaemon.pid)
+	daemonPid=$(cat "$TMP_DIR/vpndaemon.pid")
 	kill "$daemonPid"
 
-	rm -f /tmp/vpndaemon.pid
+	rm -f "$TMP_DIR/vpndaemon.pid"
 }
 
 # ------------------------------------------------
@@ -190,8 +195,8 @@ function speedtestAll {
 	export LC_NUMERIC="en_US.UTF-8"
 
 	# Empty log files
-	echo "" > /tmp/speedtestDlSpeeds.log
-	echo "" > /tmp/speedtestUpSpeeds.log
+	echo "" > "$TMP_DIR/speedtestDlSpeeds.log"
+	echo "" > "$TMP_DIR/speedtestUpSpeeds.log"
 
 	# If VPN connected, stop it
 	getStatus
@@ -251,34 +256,34 @@ function speedtestAll {
 
 			echo "OK."
 		fi
-	done < $DIR/config/servers.conf
+	done < "$CONFIG_DIR/servers.conf"
 
 	# Sort results
-	sort -r -o /tmp/speedtestDlSpeeds.log /tmp/speedtestDlSpeeds.log
-	sort -r -o /tmp/speedtestUpSpeeds.log /tmp/speedtestUpSpeeds.log
+	sort -r -o "$TMP_DIR/speedtestDlSpeeds.log" "$TMP_DIR/speedtestDlSpeeds.log"
+	sort -r -o "$TMP_DIR/speedtestUpSpeeds.log" "$TMP_DIR/speedtestUpSpeeds.log"
 
 	echo "All done !"
 
 	# Show best servers
 	echo "10 best DL servers :"
-	head -10 /tmp/speedtestDlSpeeds.log
+	head -10 "$TMP_DIR/speedtestDlSpeeds.log"
 
 	echo "10 best UP servers :"
-	head -10 /tmp/speedtestUpSpeeds.log
+	head -10 "$TMP_DIR/speedtestUpSpeeds.log"
 
 	echo "Reordering your servers.conf file with fastest servers on top..."
-	echo "" > $DIR/config/servers.conf
+	echo "" > "$CONFIG_DIR/servers.conf"
 	while read result; do
 		# Get config line from result
 		server=$(echo "$result" | grep -oP "\((.*)\)" | tr -d '()')
 
 		# Check config line format
 		if [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
-			echo "$server" >> $DIR/config/servers.conf
+			echo "$server" >> "$CONFIG_DIR/servers.conf"
 		fi
-	done < /tmp/speedtestDlSpeeds.log
+	done < "$TMP_DIR/speedtestDlSpeeds.log"
 
-	echo "# Please leave this line at the end, or the last server will not be read" >> $DIR/config/servers.conf
+	echo "# Please leave this line at the end, or the last server will not be read" >> "$CONFIG_DIR/servers.conf"
 }
 
 # ------------------------------------------------
@@ -301,8 +306,8 @@ function speedtest {
 # Log the last speedtest result
 # ------------------------------------------------
 function logSpeedtest {
-	echo "$dlSpeed ($server)" >> /tmp/speedtestDlSpeeds.log
-	echo "$upSpeed ($server)" >> /tmp/speedtestUpSpeeds.log
+	echo "$dlSpeed ($server)" >> "$TMP_DIR/speedtestDlSpeeds.log"
+	echo "$upSpeed ($server)" >> "$TMP_DIR/speedtestUpSpeeds.log"
 }
 
 # Call the main function

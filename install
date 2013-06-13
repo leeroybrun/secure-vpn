@@ -2,13 +2,31 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source $DIR/config/config.sh
+source "$DIR/config/loadConfig"
 
 # ------------------------------------------------
-# Generate login.conf file
+# Main
 # ------------------------------------------------
-	echo "$VPN_USERNAME
-	$VPN_PASSWORD" > $DIR/config/login.conf
+function main {
+	case "$1" in
+		config)
+			installConfig
+
+			exit 0
+		;;
+
+		persist)
+			makePersist
+
+			exit 0
+		;;
+
+		*)
+			echo "Usage : $0 {config|persist}"
+			exit 1
+		;;
+	esac
+}
 
 # ------------------------------------------------
 # Create file who will start VPN and add iptable
@@ -16,33 +34,55 @@ source $DIR/config/config.sh
 # Only if no "non-persistent" parameter was passed 
 # to script.
 # ------------------------------------------------
-	if [ "$1" != "nonpersistent" ]; then
-		cat >> /etc/network/if-up.d/secure-vpn << EOF
+function makePersist {
+	cat >> /etc/network/if-up.d/secure-vpn << EOF
 #!/bin/bash
 
-$DIR/secure-vpn.sh start
+"$DIR/secure-vpn" start
 EOF
 
-		chmod +x /etc/network/if-up.d/secure-vpn
+	chmod +x /etc/network/if-up.d/secure-vpn
+}
+
+# ------------------------------------------------
+# Copy config inside $CONFIG_DIR/ and add
+# options to the client.ovpn file
+# ------------------------------------------------
+function installConfig {
+	# If config dir already exist, prompt user to remove it
+	if [ -d "$CONFIG_DIR" ]; then
+		read -p "Config dir already exists. Remove & recreate it ? (y/n)?"
+		if [ "$REPLY" == "y" ]; then
+			rm -rf "$CONFIG_DIR"
+		else
+			echo "Exiting..."
+			exit 1
+		fi
 	fi
 
-# ------------------------------------------------
-# Generate good paths for OpenVPN client config
-# ------------------------------------------------
+	mkdir "$CONFIG_DIR"
+
+	cp -r "$DIR/config/*" "$CONFIG_DIR/"
+
 	# Get line where the fun starts
-	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM PATHS ###" $DIR/config/client.ovpn)
+	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM PATHS ###" "$CONFIG_DIR/client.ovpn")
 
 	# Keep only first part of the file (remove "custom" options at the end)
-	head -n $startLine $DIR/config/client.ovpn > $DIR/config/client.ovpn.tmp
-	mv $DIR/config/client.ovpn.tmp $DIR/config/client.ovpn
+	head -n $startLine "$CONFIG_DIR/client.ovpn" > "$CONFIG_DIR/client.ovpn.tmp"
+	mv "$CONFIG_DIR/client.ovpn.tmp" "$CONFIG_DIR/client.ovpn"
 
 	# Add \n at the end of the file only if it doesn't already end in a newline
-	sed -i -e '$a\' $DIR/config/client.ovpn
+	sed -i -e '$a\' "$CONFIG_DIR/client.ovpn"
 
 	# Write paths config to file
-	echo "auth-user-pass $DIR/config/login.conf" >> $DIR/config/client.ovpn
-	echo "route-up $DIR/scripts/vpn_up.sh" >> $DIR/config/client.ovpn
-	echo "" >> $DIR/config/client.ovpn
-	echo "### CUSTOM OPTIONS ###" >> $DIR/config/client.ovpn
+	echo "status $TMP_DIR/openvpn-status.log" >> "$CONFIG_DIR/client.ovpn"
+	echo "auth-user-pass $CONFIG_DIR/login.conf" >> "$CONFIG_DIR/client.ovpn"
+	echo "route-up $DIR/scripts/vpn_up.sh" >> "$CONFIG_DIR/client.ovpn"
+	echo "" >> "$CONFIG_DIR/client.ovpn"
+	echo "### CUSTOM OPTIONS ###" >> "$CONFIG_DIR/client.ovpn"
+}
+
+# Call main function
+main "$1"
 
 exit 0

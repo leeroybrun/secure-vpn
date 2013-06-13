@@ -2,7 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source $DIR/../config/config.sh
+source "$DIR/../config/loadConfig"
 
 # Delete table 100 and flush all existing rules
 ip route flush table 100
