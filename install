@@ -82,7 +82,7 @@ function installConfig {
 	# Write paths config to file
 	echo "status $TMP_DIR/openvpn-status.log" >> "$CONFIG_DIR/client.ovpn"
 	echo "auth-user-pass $CONFIG_DIR/login.conf" >> "$CONFIG_DIR/client.ovpn"
-	echo "route-up $DIR/scripts/vpn_up.sh" >> "$CONFIG_DIR/client.ovpn"
+	echo "route-up $DIR/scripts/vpn_up" >> "$CONFIG_DIR/client.ovpn"
 	echo "" >> "$CONFIG_DIR/client.ovpn"
 	echo "### CUSTOM OPTIONS ###" >> "$CONFIG_DIR/client.ovpn"
 
