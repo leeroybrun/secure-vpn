@@ -88,7 +88,7 @@ function iptablesRules
 		if [[ "$line" =~ $SRV_LINE_FORMAT ]]; then
 			read srvName srvIp srvPort srvProto <<< $line
 
-			echo "Open connections from/to $srvName : $srvIp $srvPort"
+			#echo "Open connections from/to $srvName : $srvIp $srvPort"
 
 			if [ "$srvIp" != "" ]; then
 				iptables -A INPUT -s "$srvIp" -j ACCEPT
@@ -119,8 +119,30 @@ function iptablesRules
 # Get status of VPN connection
 # ------------------------------------------------
 function getStatus {
-	ifconfig | grep "$1" && return 1
-	return 0
+	currentServer=""
+
+	if [[ $(ifconfig | grep "tun0") ]]; then
+		if [ "$currentServer" = "" ]; then
+			echo "Status: 1"
+			return 1
+		fi
+
+		currentIp=$(curl http://httpbin.org/ip)
+
+		echo "Current server : $currentServer"
+		echo "Current ip: $currentIp"
+
+		if [[ "$currentIp" == *"$currentServer"* ]]; then
+			echo "Status: 1"
+			return 1
+		else
+			echo "Status: 0"
+			return 0
+		fi
+	else
+		echo "Status: 0"
+		return 0
+	fi
 }
 
 # ------------------------------------------------
@@ -175,7 +197,7 @@ function speedtestAll {
 	echo "" > /tmp/speedtestUpSpeeds.log
 
 	# If VPN connected, stop it
-	getStatus tun0
+	getStatus
 	if [[ $? == 1 ]]; then
 		stopVPN
 	fi
@@ -205,13 +227,15 @@ function speedtestAll {
 			echo "-------------------------------------------"
 			echo "Start test... ($server)"
 
+			read srvName srvIp srvPort srvProto <<< $server
+
 			startVPN "$serverLine"
 
 			# Wait for the VPN to connect
 			sleep 10
 
 			# Check if VPN connected, if not -> stop and go to the next server
-			getStatus tun0
+			getStatus "$srvIp"
 			if [[ $? == 1 ]]; then
 				echo "VPN failed to connect... Next server."
 				stopVPN
