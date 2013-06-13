@@ -119,7 +119,7 @@ function iptablesRules
 # Get status of VPN connection
 # ------------------------------------------------
 function getStatus {
-	currentServer=""
+	currentServer="$1"
 
 	if [[ $(ifconfig | grep "tun0") ]]; then
 		if [ "$currentServer" = "" ]; then
