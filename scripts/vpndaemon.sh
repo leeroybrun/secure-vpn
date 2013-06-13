@@ -16,12 +16,25 @@ function getStatus {
 function writeAllServersConf {
 	emptyServersConfig
 
+	# Write protocol
+	echo "proto $VPN_PROTO" >> $DIR/../config/client.ovpn
+
 	# Declare associative array
 	declare -A loadedCerts
 
 	# Write all servers
 	while read server; do
 		read srvName srvIp srvPort srvProto <<< $server
+
+		# If server line is not correctly formated, exit
+		if ![[ "$server" =~ $SRV_LINE_FORMAT ]]; then
+			exit 1
+		fi
+
+		# If server protocol is not the one in config, exit
+		if [[ "$srvProto" != $VPN_PROTO ]]; then
+			exit 1
+		fi
 
 		echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
 
@@ -52,18 +65,18 @@ function writeOneServerConf {
 	# Get server line from config
 	server=$(sed -n "$[currServerLine]p" < $DIR/../config/servers.conf)
 
-	# If server line is correctly formated, parse server infos
-	if [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
-		read srvName srvIp srvPort srvProto <<< $server
-
-		# Write server config to file
-		echo "proto $srvProto" >> $DIR/../config/client.ovpn
-		echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
-		echo "ca $DIR/../config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
-	# Else, exit
-	else
+	# If server line is not correctly formated, exit
+	if ![[ "$server" =~ $SRV_LINE_FORMAT ]]; then
 		exit 1
 	fi
+
+	# All is ok, parse infos
+	read srvName srvIp srvPort srvProto <<< $server
+
+	# Write server config to file
+	echo "proto $srvProto" >> $DIR/../config/client.ovpn
+	echo "remote $srvIp $srvPort" >> $DIR/../config/client.ovpn
+	echo "ca $DIR/../config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
 }
 
 # ------------------------------------------------
