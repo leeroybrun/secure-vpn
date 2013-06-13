@@ -45,33 +45,4 @@ EOF
 	echo "" >> $DIR/config/client.ovpn
 	echo "### CUSTOM OPTIONS ###" >> $DIR/config/client.ovpn
 
-# ------------------------------------------------
-# Write all servers config to OpenVPN config file
-# ------------------------------------------------
-	# Get line where the fun starts
-	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM OPTIONS ##" $DIR/../config/client.ovpn)
-
-	# Keep only first part of the file (remove "custom" options at the end)
-	head -n $startLine $DIR/../config/client.ovpn > $DIR/../config/client.ovpn.tmp
-	mv $DIR/../config/client.ovpn.tmp $DIR/../config/client.ovpn
-
-	# Add \n at the end of the file only if it doesn't already end in a newline
-	sed -i -e '$a\' $DIR/../config/client.ovpn
-
-	# Declare associative array
-	declare -A loadedCerts
-
-	# Write all servers
-	while read server; do
-		read srvName srvIp srvPort srvProto <<< $server
-
-		echo "remote $srvIp $srvPort $srvProto" >> $DIR/../config/client.ovpn
-
-		# Only include cert if not already done
-		if [[ ${loadedCerts[$srvName]} != 1 ]]; then
-			loadedCerts[$srvName]=1
-			echo "ca $DIR/../config/certs/$srvName.crt" >> $DIR/../config/client.ovpn
-		fi
-	done < $DIR/../config/servers.conf
-
 exit 0
