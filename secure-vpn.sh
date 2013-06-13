@@ -123,24 +123,21 @@ function getStatus {
 
 	if [[ $(ifconfig | grep "tun0") ]]; then
 		if [ "$currentServer" = "" ]; then
-			echo "Status: 1"
+			echo "Status: connected"
 			return 1
 		fi
 
 		currentIp=$(curl http://httpbin.org/ip)
 
-		echo "Current server : $currentServer"
-		echo "Current ip: $currentIp"
-
 		if [[ "$currentIp" == *"$currentServer"* ]]; then
-			echo "Status: 1"
+			echo "Status: connected"
 			return 1
 		else
-			echo "Status: 0"
+			echo "Status: not connected"
 			return 0
 		fi
 	else
-		echo "Status: 0"
+		echo "Status: not connected"
 		return 0
 	fi
 }
