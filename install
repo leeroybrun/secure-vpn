@@ -16,7 +16,7 @@ source $DIR/config/config.sh
 # Only if no "non-persistent" parameter was passed 
 # to script.
 # ------------------------------------------------
-	if [ "$1" != "non-persistent" ]; then
+	if [ "$1" != "nonpersistent" ]; then
 		cat >> /etc/network/if-up.d/secure-vpn << EOF
 #!/bin/bash
 
