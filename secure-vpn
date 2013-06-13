@@ -166,7 +166,7 @@ function startVPN
 		fi
 	fi
 
-	nohup bash "$DIR/scripts/vpndaemon" "$serverToStart" > "$DIR/vpndaemon.log" 2>&1 &
+	nohup bash "$DIR/scripts/vpndaemon" "$serverToStart" > "$TMP_DIR/vpndaemon.log" 2>&1 &
 	echo $! > "$TMP_DIR/vpndaemon.pid"
 }
 
