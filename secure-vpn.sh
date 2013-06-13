@@ -208,7 +208,7 @@ function speedtestAll {
 			startVPN "$serverLine"
 
 			# Wait for the VPN to connect
-			sleep 5
+			sleep 10
 
 			# Check if VPN connected, if not -> stop and go to the next server
 			getStatus tun0
