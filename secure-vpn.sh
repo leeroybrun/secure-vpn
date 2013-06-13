@@ -240,8 +240,8 @@ function speedtestAll {
 			else
 				echo "VPN failed to connect..."
 
-				dlSpeed="Error"
-				upSpeed="Error"
+				dlSpeed="0.0"
+				upSpeed="0.0"
 			fi
 
 			# Log the results
