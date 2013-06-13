@@ -7,6 +7,13 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # ------------------------------------------------
 source "$DIR/config/loadConfig"
 
+# Check if config has been set or not
+if [ "$CONFIG_SET" -eq 0 ]; then
+	echo "Please first install the script : ./install"
+	echo "Then update config in $CONFIG_DIR."
+	exit 1
+fi
+
 # ------------------------------------------------
 # Main
 # ------------------------------------------------
