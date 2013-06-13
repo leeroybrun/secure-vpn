@@ -184,12 +184,14 @@ function stopVPN
 {
 	echo "Stop VPN daemon"
 
-	pkill openvpn
+	pkill openvpn 2> /dev/null
 
-	daemonPid=$(cat "$TMP_DIR/vpndaemon.pid")
-	kill "$daemonPid"
+	if [ -f "$TMP_DIR/vpndaemon.pid" ]; then
+		daemonPid=$(cat "$TMP_DIR/vpndaemon.pid")
+		kill "$daemonPid" 2> /dev/null
 
-	rm -f "$TMP_DIR/vpndaemon.pid"
+		rm -f "$TMP_DIR/vpndaemon.pid"
+	fi
 }
 
 # ------------------------------------------------
