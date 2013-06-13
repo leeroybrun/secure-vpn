@@ -62,7 +62,7 @@ function installConfig {
 
 	mkdir "$CONFIG_DIR"
 
-	cp -r "$DIR/config/*" "$CONFIG_DIR/"
+	cp -r "$DIR/config/"* "$CONFIG_DIR/"
 
 	# Get line where the fun starts
 	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM PATHS ###" "$CONFIG_DIR/client.ovpn")
