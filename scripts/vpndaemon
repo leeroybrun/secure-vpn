@@ -38,12 +38,12 @@ function writeAllServersConf {
 
 		# If server line is not correctly formated, exit
 		if ! [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
-			exit 1
+			return 0
 		fi
 
 		# If server protocol is not the one in config, exit
 		if [[ "$srvProto" != $VPN_PROTO ]]; then
-			exit 1
+			return 0
 		fi
 
 		echo "remote $srvIp $srvPort" >> "$CONFIG_DIR/client.ovpn"
@@ -54,6 +54,8 @@ function writeAllServersConf {
 			echo "ca $CONFIG_DIR/certs/$srvName.crt" >> "$CONFIG_DIR/client.ovpn"
 		fi
 	done < "$CONFIG_DIR/servers.conf"
+
+	return 1
 }
 
 # ------------------------------------------------
@@ -69,7 +71,7 @@ function writeOneServerConf {
 
 	# Current server doesn't exist (number gt nbServers), exit
 	if [ $currServerLine -gt $nbServers ]; then
-		exit 1
+		return 0
 	fi
 
 	# Get server line from config
@@ -77,7 +79,7 @@ function writeOneServerConf {
 
 	# If server line is not correctly formated, exit
 	if ! [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
-		exit 1
+		return 0
 	fi
 
 	# All is ok, parse infos
@@ -87,6 +89,8 @@ function writeOneServerConf {
 	echo "proto $srvProto" >> "$CONFIG_DIR/client.ovpn"
 	echo "remote $srvIp $srvPort" >> "$CONFIG_DIR/client.ovpn"
 	echo "ca $CONFIG_DIR/certs/$srvName.crt" >> "$CONFIG_DIR/client.ovpn"
+
+	return 1
 }
 
 # ------------------------------------------------
@@ -94,7 +98,7 @@ function writeOneServerConf {
 # ------------------------------------------------
 function emptyServersConfig {
 	# Get line where the fun starts
-	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM OPTIONS ##" "$CONFIG_DIR/client.ovpn")
+	startLine=$(awk '$0 ~ str{print NR FS b}{b=$0}' str="### CUSTOM OPTIONS ###" "$CONFIG_DIR/client.ovpn")
 
 	# Keep only first part of the file (remove "custom" options at the end)
 	head -n $startLine "$CONFIG_DIR/client.ovpn" > "$CONFIG_DIR/client.ovpn.tmp"
@@ -112,6 +116,12 @@ if [[ "$1" =~ ^[0-9]+$ ]]; then
 	writeOneServerConf "$1"
 else
 	writeAllServersConf
+fi
+
+# If an error occured during writeOneServerConf or writeAllServersConf
+if [[ $? == 0 ]]; then
+	echo "An error occured during config read/write. Exiting..."
+	exit 1
 fi
 
 # ------------------------------------------------
