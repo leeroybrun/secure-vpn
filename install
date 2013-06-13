@@ -80,6 +80,7 @@ function installConfig {
 	sed -i -e '$a\' "$CONFIG_DIR/client.ovpn"
 
 	# Write paths config to file
+	echo "ca $CONFIG_DIR/servers.crt" >> "$CONFIG_DIR/client.ovpn"
 	echo "status $TMP_DIR/openvpn-status.log" >> "$CONFIG_DIR/client.ovpn"
 	echo "auth-user-pass $CONFIG_DIR/login.conf" >> "$CONFIG_DIR/client.ovpn"
 	echo "route-up $DIR/scripts/vpn_up" >> "$CONFIG_DIR/client.ovpn"
