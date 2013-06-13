@@ -231,15 +231,20 @@ function speedtestAll {
 			# Wait for the VPN to connect
 			sleep 10
 
-			# Check if VPN connected, if not -> stop and go to the next server
+			# If VPN connected -> run speedtest
 			getStatus "$srvIp"
-			if [[ $? == 0 ]]; then
-				echo "VPN failed to connect... Next server."
-				stopVPN
-				continue
+			if [[ $? == 1 ]]; then
+				speedtest "$server"
+
+			# If VPN not connected, log the error
+			else
+				echo "VPN failed to connect..."
+
+				dlSpeed="Error"
+				upSpeed="Error"
 			fi
 
-			speedtest "$server"
+			# Log the results
 			logSpeedtest
 
 			stopVPN
@@ -260,6 +265,20 @@ function speedtestAll {
 
 	echo "10 best UP servers :"
 	head -10 /tmp/speedtestUpSpeeds.log
+
+	echo "Reordering your servers.conf file with fastest servers on top..."
+	echo "" > $DIR/config/servers.conf
+	while read result; do
+		# Get config line from result
+		server=$(echo "$result" | grep -oP "\((.*)\)" | tr -d '()')
+
+		# Check config line format
+		if [[ "$server" =~ $SRV_LINE_FORMAT ]]; then
+			echo "$server" >> $DIR/config/servers.conf
+		fi
+	done < /tmp/speedtestDlSpeeds.log
+
+	echo "# Please leave this line at the end, or the last server will not be read" >> $DIR/config/servers.conf
 }
 
 # ------------------------------------------------
