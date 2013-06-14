@@ -39,6 +39,24 @@ If you call it manually, here are the available commands :
 - `sudo ./secure-vpn.sh flush-iptables` : flush iptables rules
 - `sudo ./secure-vpn.sh speedtest` : connect to each VPN servers defined in config & run a speedtest. It will then output the 10 best servers and reorder your servers.conf file to put the bests on top.
 
+## Configuration
+
+### config
+
+```plain
+VPN_PROTO="udp"
+
+OPEN_PORTS="xxxx xxxx xxxx"
+
+SERVER_IP="xxx.xxx.xxx.xxx"
+
+LOCAL_NETWORK="xxx.xxx.xxx.xxx/24"
+WAN_INTERFACE="ethX"
+WAN_GATEWAY="xxx.xxx.xxx.xxx"
+
+SPEEDTEST_CLI="speedtest-cli"
+```
+
 ## Todo :
 - knock knock for ports opening
 - auto detect local network, gateway & IP
