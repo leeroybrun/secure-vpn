@@ -60,3 +60,5 @@ SPEEDTEST_CLI="speedtest-cli"
 ## Todo :
 - knock knock for ports opening
 - auto detect local network, gateway & IP
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/leeroybrun/secure-vpn/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
